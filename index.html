@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA y Derechos de Autor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0b0f;
+  --paper:#141520;
+  --paper-2:#1c1e2c;
+  --violet:#8b7cff;
+  --cyan:#3fe8cf;
+  --amber:#f5a94e;
+  --text:#eceaf4;
+  --text-dim:#9694ab;
+  --line:rgba(236,234,244,0.1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--ink);
+  color:var(--text);
+  font-family:'Space Grotesk',sans-serif;
+  overflow-x:hidden;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important;}
+}
+
+/* ---------- shared ---------- */
+.section{
+  min-height:100vh;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:8vh 8vw;
+  border-bottom:1px solid var(--line);
+  overflow:hidden;
+}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.78rem;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--cyan);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:1.4rem;
+  opacity:0;
+  animation:fadeUp .8s ease forwards;
+}
+.eyebrow::before{
+  content:'';
+  width:26px;height:1px;background:var(--cyan);
+}
+h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
+.serif{font-family:'Fraunces',serif; font-style:italic; font-weight:500;}
+.reveal{opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s ease;}
+.reveal.in{opacity:1; transform:translateY(0);}
+@keyframes fadeUp{from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);}}
+@keyframes floaty{0%,100%{transform:translateY(0);} 50%{transform:translateY(-14px);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes pulseGlow{0%,100%{opacity:.45;} 50%{opacity:1;}}
+@keyframes glitch{
+  0%,100%{clip-path:inset(0 0 0 0); transform:translate(0,0);}
+  92%{clip-path:inset(0 0 0 0); transform:translate(0,0);}
+  93%{clip-path:inset(10% 0 60% 0); transform:translate(-3px,0);}
+  94%{clip-path:inset(60% 0 5% 0); transform:translate(3px,0);}
+  95%{clip-path:inset(30% 0 40% 0); transform:translate(-2px,0);}
+  96%{clip-path:inset(0 0 0 0); transform:translate(0,0);}
+}
+::selection{background:var(--violet); color:var(--ink);}
+
+/* ---------- progress bar ---------- */
+#progress{
+  position:fixed; top:0; left:0; height:3px;
+  background:linear-gradient(90deg,var(--violet),var(--cyan));
+  z-index:999; width:0%;
+  box-shadow:0 0 12px var(--cyan);
+}
+
+/* ---------- nav dots ---------- */
+#nav{
+  position:fixed; right:26px; top:50%; transform:translateY(-50%);
+  z-index:998; display:flex; flex-direction:column; gap:14px;
+}
+#nav a{
+  width:9px; height:9px; border-radius:50%;
+  background:var(--line); display:block; position:relative;
+  transition:.3s;
+}
+#nav a.active{background:var(--cyan); box-shadow:0 0 10px var(--cyan);}
+#nav a span{
+  position:absolute; right:20px; top:50%; transform:translateY(-50%);
+  font-family:'JetBrains Mono',monospace; font-size:.68rem; color:var(--text-dim);
+  white-space:nowrap; opacity:0; transition:.25s; pointer-events:none;
+}
+#nav a:hover span{opacity:1;}
+
+/* ---------- HERO ---------- */
+#hero{
+  align-items:center; text-align:center; background:
+    radial-gradient(ellipse at 30% 20%, rgba(139,124,255,0.18), transparent 55%),
+    radial-gradient(ellipse at 75% 80%, rgba(63,232,207,0.14), transparent 55%),
+    var(--ink);
+}
+.grid-overlay{
+  position:absolute; inset:0; opacity:.35; pointer-events:none;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse at center, black 0%, transparent 75%);
+}
+.hero-mark{
+  position:relative; width:180px; height:180px; margin:0 auto 1.6rem;
+}
+.hero-mark svg{width:100%; height:100%;}
+.hero-mark .glitch-layer{
+  position:absolute; inset:0; animation:glitch 6s infinite;
+  color:var(--amber);
+}
+.hero-title{
+  font-size:clamp(2.4rem, 7vw, 5.2rem);
+  line-height:1.02;
+}
+.hero-title .g{
+  background:linear-gradient(100deg,var(--violet),var(--cyan) 60%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.hero-sub{
+  margin-top:1.4rem; color:var(--text-dim); font-size:1.05rem;
+  max-width:560px; margin-left:auto; margin-right:auto;
+}
+.hero-meta{
+  margin-top:3rem; display:flex; gap:2.4rem; flex-wrap:wrap; justify-content:center;
+  font-family:'JetBrains Mono',monospace; font-size:.78rem; color:var(--text-dim);
+  letter-spacing:.06em;
+}
+.hero-meta b{color:var(--text); font-weight:500;}
+.scroll-cue{
+  position:absolute; bottom:36px; left:50%; transform:translateX(-50%);
+  font-family:'JetBrains Mono',monospace; font-size:.7rem; color:var(--text-dim);
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  letter-spacing:.15em;
+}
+.scroll-cue .line{width:1px; height:34px; background:linear-gradient(var(--cyan),transparent); animation:floaty 2s ease-in-out infinite;}
+
+/* ---------- speaker sections ---------- */
+.spk-head{
+  display:flex; align-items:baseline; gap:1.4rem; flex-wrap:wrap;
+}
+.spk-num{
+  font-family:'JetBrains Mono',monospace; font-size:1rem; color:var(--text-dim);
+}
+.spk-title{
+  font-size:clamp(2rem,5vw,3.4rem);
+}
+.timer-badge{
+  margin-left:auto; display:flex; align-items:center; gap:8px;
+  border:1px solid var(--line); border-radius:100px; padding:8px 16px;
+  font-family:'JetBrains Mono',monospace; font-size:.78rem; color:var(--text-dim);
+}
+.timer-badge .dot{width:7px;height:7px;border-radius:50%; background:var(--amber); animation:pulseGlow 1.6s infinite;}
+
+.spk-lead{
+  margin-top:1.2rem; max-width:640px; color:var(--text-dim); font-size:1.05rem;
+}
+.card-row{
+  margin-top:3rem; display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:18px;
+}
+.card{
+  background:linear-gradient(160deg, var(--paper), var(--paper-2));
+  border:1px solid var(--line); border-radius:16px; padding:1.6rem;
+  position:relative; overflow:hidden; transition:transform .35s ease, border-color .35s ease;
+}
+.card:hover{transform:translateY(-6px); border-color:var(--cyan);}
+.card::after{
+  content:''; position:absolute; inset:0; opacity:0; transition:.35s;
+  background:radial-gradient(120px circle at var(--mx,50%) var(--my,50%), rgba(63,232,207,0.15), transparent 60%);
+}
+.card:hover::after{opacity:1;}
+.card .ic{font-size:1.6rem; display:inline-block; margin-bottom:.9rem;}
+.card h4{font-size:1.02rem; margin-bottom:.5rem; font-weight:600;}
+.card p{font-size:.88rem; color:var(--text-dim); line-height:1.5;}
+
+/* section-specific accents */
+#s1{background:radial-gradient(circle at 85% 15%, rgba(139,124,255,0.12), transparent 50%);}
+#s2{background:radial-gradient(circle at 10% 85%, rgba(245,169,78,0.10), transparent 50%);}
+#s3{background:radial-gradient(circle at 90% 80%, rgba(63,232,207,0.12), transparent 50%);}
+#s4{background:radial-gradient(circle at 15% 20%, rgba(139,124,255,0.14), transparent 50%);}
+
+/* case chips for s3 */
+.case-strip{margin-top:2.6rem; display:flex; flex-wrap:wrap; gap:14px;}
+.case-chip{
+  border:1px dashed var(--line); border-radius:12px; padding:1rem 1.3rem; min-width:190px; flex:1;
+  font-family:'JetBrains Mono',monospace;
+}
+.case-chip .vs{color:var(--amber); font-size:.72rem; letter-spacing:.1em;}
+.case-chip .name{font-family:'Space Grotesk',sans-serif; font-size:1rem; margin-top:.3rem;}
+.case-chip .status{font-size:.72rem; color:var(--text-dim); margin-top:.4rem;}
+
+/* scales / vs visual for s2 */
+.balance{
+  margin-top:3rem; display:flex; align-items:flex-end; justify-content:center; gap:0; max-width:600px;
+}
+.balance .plate{
+  flex:1; text-align:center; padding:1.6rem 1rem; border-radius:14px;
+  font-family:'JetBrains Mono',monospace; font-size:.82rem;
+}
+.balance .left{background:linear-gradient(160deg,var(--paper),var(--paper-2)); border:1px solid var(--violet); border-bottom-left-radius:4px;}
+.balance .right{background:linear-gradient(160deg,var(--paper),var(--paper-2)); border:1px solid var(--amber); border-bottom-right-radius:4px;}
+.balance .fulcrum{width:2px; align-self:stretch; background:var(--line); margin:0 -1px;}
+.balance .plate b{display:block; font-family:'Space Grotesk',sans-serif; font-size:1.3rem; margin-bottom:.5rem;}
+
+/* closing */
+#outro{align-items:center; text-align:center;}
+.outro-q{
+  font-family:'Fraunces',serif; font-style:italic; font-weight:500;
+  font-size:clamp(1.5rem,4vw,2.6rem); max-width:800px; line-height:1.3;
+}
+.outro-tags{margin-top:2.4rem; display:flex; gap:12px; flex-wrap:wrap; justify-content:center;}
+.tag{
+  border:1px solid var(--line); border-radius:100px; padding:.5rem 1.1rem;
+  font-family:'JetBrains Mono',monospace; font-size:.75rem; color:var(--text-dim);
+}
+.credits{margin-top:4rem; font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--text-dim); letter-spacing:.08em;}
+
+/* ---------- illustration frame ---------- */
+.illo{
+  margin-top:2.6rem; display:flex; justify-content:center;
+}
+.illo svg{width:100%; max-width:520px; height:auto;}
+.illo-row{
+  margin-top:2.6rem; display:grid; grid-template-columns:1.1fr 1fr; gap:2.4rem; align-items:center;
+}
+@media(max-width:900px){ .illo-row{grid-template-columns:1fr;} }
+
+/* ---------- stat strip ---------- */
+.stat-row{
+  margin-top:2.6rem; display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:18px;
+}
+.stat{
+  border-left:2px solid var(--cyan); padding:.2rem 0 .2rem 1rem;
+}
+.stat b{
+  display:block; font-size:1.9rem; font-family:'Space Grotesk',sans-serif;
+  background:linear-gradient(100deg,var(--violet),var(--cyan)); -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.stat span{font-size:.78rem; color:var(--text-dim); font-family:'JetBrains Mono',monospace;}
+
+/* ---------- timeline ---------- */
+.timeline{
+  margin-top:2.8rem; position:relative; padding-left:26px;
+}
+.timeline::before{
+  content:''; position:absolute; left:6px; top:6px; bottom:6px; width:1px;
+  background:linear-gradient(var(--violet),var(--cyan));
+}
+.tl-item{position:relative; padding-bottom:1.6rem;}
+.tl-item::before{
+  content:''; position:absolute; left:-26px; top:4px; width:11px; height:11px; border-radius:50%;
+  background:var(--ink); border:2px solid var(--cyan);
+}
+.tl-item .yr{font-family:'JetBrains Mono',monospace; font-size:.76rem; color:var(--cyan);}
+.tl-item h5{font-size:.98rem; margin:.25rem 0 .2rem; font-weight:600;}
+.tl-item p{font-size:.85rem; color:var(--text-dim); max-width:520px;}
+
+/* floating particles canvas-less, pure css */
+.particle{
+  position:absolute; border-radius:50%; background:var(--cyan); opacity:.5; filter:blur(1px);
+  animation:floaty 6s ease-in-out infinite;
+}
+
+@media(max-width:640px){
+  #nav{display:none;}
+  .section{padding:9vh 6vw;}
+  .balance{flex-direction:column;}
+  .balance .fulcrum{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<nav id="nav">
+  <a href="#hero" data-i="0"><span>Intro</span></a>
+  <a href="#s1" data-i="1"><span>01 · Creación</span></a>
+  <a href="#s2" data-i="2"><span>02 · Marco legal</span></a>
+  <a href="#s3" data-i="3"><span>03 · Casos reales</span></a>
+  <a href="#s4" data-i="4"><span>04 · Futuro</span></a>
+  <a href="#outro" data-i="5"><span>Cierre</span></a>
+</nav>
+
+<!-- HERO -->
+<section class="section" id="hero">
+  <div class="grid-overlay"></div>
+  <div class="hero-mark">
+    <svg viewBox="0 0 200 200" fill="none">
+      <circle cx="100" cy="100" r="92" stroke="url(#g1)" stroke-width="1.4" stroke-dasharray="4 6"/>
+      <circle cx="100" cy="100" r="70" stroke="var(--violet)" stroke-width="1" opacity=".5"/>
+      <text x="100" y="122" text-anchor="middle" font-size="86" font-family="Fraunces, serif" fill="url(#g1)">©</text>
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="200" y2="200">
+          <stop offset="0" stop-color="#8b7cff"/>
+          <stop offset="1" stop-color="#3fe8cf"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="glitch-layer">
+      <svg viewBox="0 0 200 200" fill="none">
+        <text x="100" y="122" text-anchor="middle" font-size="70" font-family="JetBrains Mono, monospace" fill="currentColor"> </text>
+      </svg>
+    </div>
+  </div>
+  <div class="eyebrow" style="justify-content:center; animation-delay:.1s;">TICS</div>
+  <h1 class="hero-title reveal in" style="animation-delay:.2s;">Inteligencia <span class="g">Artificial</span><br>y Derechos de <span class="g">Autor</span></h1>
+  <p class="hero-sub reveal in" style="transition-delay:.35s;">Cuando una máquina aprende de la obra humana, quién es el autor? Un recorrido por creación, ley, litigios y lo que viene.</p>
+  <div class="hero-meta">
+    <div><b>4</b> Integrantes</div>
+    <div><b>4</b> Temas</div>
+    <div><b>4</b> Puntos de vista</div>
+  </div>
+  <div class="scroll-cue"><div class="line"></div> ▼ </div>
+</section>
+
+<!-- 01 -->
+<section class="section" id="s1">
+  <div class="spk-head reveal">
+    <span class="spk-num">Briám Leyva  01/04</span>
+    <h2 class="spk-title">La máquina que <span class="serif">aprende a crear</span></h2>
+    <div class="timer-badge"><span class="dot"></span>5 min</div>
+  </div>
+  <p class="spk-lead reveal">Cómo los modelos generativos usan millones de obras protegidas para aprender patrones — texto, imagen, música — y por qué eso ya es, en sí mismo, el centro del conflicto.</p>
+
+  <div class="illo-row">
+    <div>
+      <div class="card-row" style="margin-top:0;">
+        <div class="card reveal"><span class="ic">🧠</span><h4>Entrenamiento</h4><p>Los modelos se alimentan de datasets masivos raspados de internet: libros, artículos, fotografías, cuadros e ilustraciones, casi siempre sin pedir permiso al autor.</p></div>
+        <div class="card reveal"><span class="ic">🎨</span><h4>Generación</h4><p>El resultado no "copia" un archivo literalmente, pero sí absorbe estilo, voz, composición y trazo de miles de obras existentes.</p></div>
+        <div class="card reveal"><span class="ic">❓</span><h4>La pregunta central</h4><p>¿Aprender de una obra equivale a inspirarse como un humano, o es una copia a escala industrial de millones de creadores a la vez?</p></div>
+        <div class="card reveal"><span class="ic">🖼️</span><h4>Caso Ai-Da</h4><p>Un robot artista cuyas pinturas ya se han vendido por más de un millón de dólares, sin que exista claridad legal sobre quién es realmente el "autor".</p></div>
+      </div>
+    </div>
+    <div class="illo reveal">
+      <svg viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="s1g" x1="0" y1="0" x2="320" y2="320">
+            <stop offset="0" stop-color="#8b7cff"/><stop offset="1" stop-color="#3fe8cf"/>
+          </linearGradient>
+        </defs>
+        <circle cx="160" cy="160" r="140" stroke="#232537" stroke-width="1"/>
+        <circle cx="160" cy="160" r="100" stroke="#232537" stroke-width="1" stroke-dasharray="2 6"/>
+        <!-- robot head -->
+        <rect x="112" y="96" width="96" height="80" rx="14" stroke="url(#s1g)" stroke-width="2.2"/>
+        <circle cx="140" cy="132" r="8" fill="url(#s1g)"><animate attributeName="opacity" values="1;.3;1" dur="2.4s" repeatCount="indefinite"/></circle>
+        <circle cx="180" cy="132" r="8" fill="url(#s1g)"><animate attributeName="opacity" values=".3;1;.3" dur="2.4s" repeatCount="indefinite"/></circle>
+        <path d="M136 158 h48" stroke="url(#s1g)" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M160 96 v-18" stroke="url(#s1g)" stroke-width="2"/>
+        <circle cx="160" cy="72" r="6" stroke="url(#s1g)" stroke-width="2"/>
+        <!-- arm holding brush -->
+        <path d="M112 150 q-30 10 -34 46" stroke="url(#s1g)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <path d="M78 196 l-14 22" stroke="var(--amber)" stroke-width="3" stroke-linecap="round"/>
+        <path d="M64 218 l-10 16" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+        <!-- canvas -->
+        <rect x="196" y="188" width="70" height="86" rx="4" stroke="#4a4c63" stroke-width="1.6"/>
+        <path d="M204 258 q14 -34 26 -10 q10 20 28 -18" stroke="url(#s1g)" stroke-width="2" fill="none" opacity=".8"/>
+        <path d="M210 244 q10 -18 18 -4" stroke="var(--amber)" stroke-width="2" fill="none" opacity=".6"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="stat-row reveal">
+    <div class="stat"><b>1M+</b><span>USD pagados por una pintura del robot Ai-Da</span></div>
+    <div class="stat"><b>Aprox 5</b><span>grandes modelos generativos dominan el mercado actual</span></div>
+    <div class="stat"><b>0</b><span>consentimiento pedido a la mayoría de autores originales</span></div>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="section" id="s2">
+  <div class="spk-head reveal">
+    <span class="spk-num">Kevin Quinga  02/04</span>
+    <h2 class="spk-title">La ley <span class="serif">frente al</span> algoritmo</h2>
+    <div class="timer-badge"><span class="dot"></span>5 min</div>
+  </div>
+  <p class="spk-lead reveal">El derecho de autor nació para proteger obras humanas. Hoy intenta estirarse para cubrir un fenómeno que no imaginó.</p>
+  <div class="balance reveal">
+    <div class="plate left"><b>Derecho de autor</b>Protege obras humanas originales. Exige un "autor" identificable y creatividad real, no solo mecánica.</div>
+    <div class="fulcrum"></div>
+    <div class="plate right"><b>IA generativa</b>Sin intención consciente ni autoría clara: la oficina de EE. UU. ya dijo que una obra 100% generada por IA no se puede registrar.</div>
+  </div>
+
+  <div class="illo-row" style="margin-top:3rem; align-items:start;">
+    <div class="timeline reveal">
+      <div class="tl-item"><span class="yr">1886</span><h5>Convenio de Berna</h5><p>Sienta las bases internacionales del derecho de autor: la obra debe nacer de un acto humano de creación.</p></div>
+      <div class="tl-item"><span class="yr">2023</span><h5>Guía de la Oficina de Copyright (EE. UU.)</h5><p>Confirma que el contenido generado íntegramente por IA no es registrable; solo protege la parte de aportación humana.</p></div>
+      <div class="tl-item"><span class="yr">2023–2024</span><h5>Casos "Zarya of the Dawn" y Thaler</h5><p>Se niegan registros de obras creadas por IA sin intervención creativa humana significativa.</p></div>
+      <div class="tl-item"><span class="yr">2025</span><h5>Informe Copyright y IA, Parte 2</h5><p>Reafirma que los prompts, por sí solos, no bastan para reclamar autoría humana sobre lo generado.</p></div>
+    </div>
+    <div class="illo reveal">
+      <svg viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="s2g" x1="0" y1="0" x2="300" y2="300">
+            <stop offset="0" stop-color="#f5a94e"/><stop offset="1" stop-color="#8b7cff"/>
+          </linearGradient>
+        </defs>
+        <path d="M150 40 v190" stroke="url(#s2g)" stroke-width="2.4"/>
+        <circle cx="150" cy="40" r="7" fill="url(#s2g)"/>
+        <path d="M60 90 L150 62 L240 90" stroke="url(#s2g)" stroke-width="2" fill="none"/>
+        <path d="M60 90 v0 q0 40 -34 44 q60 14 68 0 q-34 -4 -34 -44Z" stroke="url(#s2g)" stroke-width="1.8" fill="none">
+          <animateTransform attributeName="transform" type="rotate" values="0 60 90; -6 60 90; 0 60 90" dur="3.4s" repeatCount="indefinite"/>
+        </path>
+        <path d="M240 90 v0 q0 40 -34 44 q60 14 68 0 q-34 -4 -34 -44Z" stroke="var(--amber)" stroke-width="1.8" fill="none">
+          <animateTransform attributeName="transform" type="rotate" values="0 240 90; 6 240 90; 0 240 90" dur="3.4s" repeatCount="indefinite"/>
+        </path>
+        <rect x="120" y="228" width="60" height="14" rx="3" stroke="url(#s2g)" stroke-width="2"/>
+        <rect x="100" y="242" width="100" height="16" rx="3" stroke="url(#s2g)" stroke-width="2"/>
+        <text x="150" y="24" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="var(--text-dim)">EQUILIBRIO LEGAL</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="card-row">
+    <div class="card reveal"><span class="ic">👤</span><h4>Sin autoría clara</h4><p>La mayoría de oficinas de copyright no registran obras creadas únicamente por IA, aunque sí protegen la parte editada por un humano.</p></div>
+    <div class="card reveal"><span class="ic">📄</span><h4>Uso justo (fair use)</h4><p>El gran debate en las cortes: ¿entrenar un modelo con obras ajenas cae dentro del "uso justo" o es infracción directa?</p></div>
+    <div class="card reveal"><span class="ic">🌍</span><h4>Enfoques distintos</h4><p>China y Corea del Sur ya han reconocido cierta autoría cuando el humano ejerce control creativo real sobre el resultado.</p></div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="section" id="s3">
+  <div class="spk-head reveal">
+    <span class="spk-num">Jhon Redrovan  03/04</span>
+    <h2 class="spk-title">Casos que <span class="serif">están escribiendo</span> la ley</h2>
+    <div class="timer-badge"><span class="dot"></span>5 min</div>
+  </div>
+  <p class="spk-lead reveal">Autores, artistas y medios ya están en los tribunales. Estas demandas definirán las reglas del juego para la próxima década.</p>
+
+  <div class="illo-row">
+    <div class="illo reveal" style="order:2;">
+      <svg viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="s3g" x1="0" y1="0" x2="300" y2="300">
+            <stop offset="0" stop-color="#3fe8cf"/><stop offset="1" stop-color="#8b7cff"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="150" cy="235" rx="90" ry="10" fill="#1c1e2c"/>
+        <rect x="70" y="220" width="70" height="14" rx="3" stroke="url(#s3g)" stroke-width="2"/>
+        <g>
+          <animateTransform attributeName="transform" type="rotate" values="-18 96 150; -30 96 150; -18 96 150" dur="2.6s" repeatCount="indefinite"/>
+          <rect x="80" y="140" width="90" height="20" rx="6" stroke="var(--amber)" stroke-width="2.4"/>
+          <rect x="70" y="118" width="24" height="46" rx="6" stroke="var(--amber)" stroke-width="2.4"/>
+        </g>
+        <circle cx="150" cy="150" r="3" fill="url(#s3g)"/>
+        <path d="M180 90 h50 M180 100 h50 M180 110 h34" stroke="#4a4c63" stroke-width="2" stroke-linecap="round"/>
+        <text x="150" y="30" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="var(--text-dim)">EN LITIGIO</text>
+      </svg>
+    </div>
+    <div style="order:1;">
+      <div class="case-strip">
+        <div class="case-chip reveal"><div class="vs">MEDIO VS EMPRESA IA</div><div class="name">NYT vs OpenAI</div><div class="status">● desde dic. 2023 · uso de artículos para entrenar chatbots</div></div>
+        <div class="case-chip reveal"><div class="vs">BANCO DE IMÁGENES VS EMPRESA IA</div><div class="name">Getty Images vs Stability AI</div><div class="status">● desde 2023 · millones de fotos usadas sin licencia</div></div>
+        <div class="case-chip reveal"><div class="vs">AUTORES VS EMPRESA IA</div><div class="name">Autores vs Meta</div><div class="status">● demanda colectiva por libros pirateados en el entrenamiento</div></div>
+        <div class="case-chip reveal"><div class="vs">CREADOR VS OFICINA DE COPYRIGHT</div><div class="name">Thaler vs U.S. Copyright Office</div><div class="status">● 2025 · corte confirma: sin autor humano, no hay copyright</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-row">
+    <div class="card reveal"><span class="ic">📰</span><h4>Medios de prensa</h4><p>Alegan que sus artículos se usaron sin permiso ni pago para entrenar chatbots que ahora compiten con ellos por audiencia.</p></div>
+    <div class="card reveal"><span class="ic">🖼️</span><h4>Artistas visuales</h4><p>Reclaman que su estilo personal se replica con solo escribir su nombre en un prompt, sin consentimiento ni crédito.</p></div>
+    <div class="card reveal"><span class="ic">📚</span><h4>Escritores y editoriales</h4><p>Denuncian el uso de bibliotecas piratas completas como fuente de entrenamiento para modelos de lenguaje.</p></div>
+    <div class="card reveal"><span class="ic">🏢</span><h4>La defensa de las empresas de IA</h4><p>Argumentan que entrenar un modelo es "uso justo": aprenden patrones, no almacenan ni reproducen las obras originales.</p></div>
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="section" id="s4">
+  <div class="spk-head reveal">
+    <span class="spk-num">David Paucar  04/04</span>
+    <h2 class="spk-title">¿Hacia <span class="serif">dónde</span> vamos?</h2>
+    <div class="timer-badge"><span class="dot"></span>5 min</div>
+  </div>
+  <p class="spk-lead reveal">Ninguna ley actual resuelve esto del todo. Estas son las salidas que gobiernos, empresas y creadores ya están explorando.</p>
+
+  <div class="illo reveal">
+    <svg viewBox="0 0 520 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="s4g" x1="0" y1="0" x2="520" y2="220">
+          <stop offset="0" stop-color="#8b7cff"/><stop offset="1" stop-color="#3fe8cf"/>
+        </linearGradient>
+      </defs>
+      <circle cx="40" cy="110" r="9" fill="url(#s4g)"/>
+      <path d="M49 110 C 140 110, 140 40, 230 40" stroke="url(#s4g)" stroke-width="1.6" fill="none"/>
+      <path d="M49 110 C 140 110, 140 110, 230 110" stroke="url(#s4g)" stroke-width="1.6" fill="none"/>
+      <path d="M49 110 C 140 110, 140 180, 230 180" stroke="url(#s4g)" stroke-width="1.6" fill="none"/>
+      <path d="M49 110 C 140 110, 140 150, 230 150" stroke="var(--amber)" stroke-width="1.4" fill="none" opacity=".6"/>
+      <circle cx="230" cy="40" r="6" fill="var(--cyan)"/>
+      <circle cx="230" cy="110" r="6" fill="var(--violet)"/>
+      <circle cx="230" cy="180" r="6" fill="var(--cyan)"/>
+      <circle cx="230" cy="150" r="5" fill="var(--amber)"/>
+      <text x="250" y="45" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text-dim)">Licenciamiento</text>
+      <text x="250" y="115" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text-dim)">Transparencia</text>
+      <text x="250" y="155" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text-dim)">Opt-out</text>
+      <text x="250" y="185" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text-dim)">Nueva legislación</text>
+    </svg>
+  </div>
+
+  <div class="card-row">
+    <div class="card reveal"><span class="ic">💰</span><h4>Licenciamiento</h4><p>Acuerdos pagados entre empresas de IA y editoriales, bancos de imágenes o discográficas para usar contenido legalmente.</p></div>
+    <div class="card reveal"><span class="ic">🔍</span><h4>Transparencia</h4><p>Obligar a las empresas a revelar qué datasets y obras entrenaron cada modelo, algo que hoy casi nadie declara.</p></div>
+    <div class="card reveal"><span class="ic">🚫</span><h4>Opt-out</h4><p>Permitir a los creadores excluir activamente su obra del entrenamiento, como ya ofrecen algunas plataformas.</p></div>
+    <div class="card reveal"><span class="ic">🏛️</span><h4>Nueva legislación</h4><p>Leyes específicas para IA —como el Reglamento europeo de IA (2024)— que exigen documentar los datos de entrenamiento.</p></div>
+    <div class="card reveal"><span class="ic">🤝</span><h4>Coautoría declarada</h4><p>Registrar obras aclarando qué parte es humana y cuál es generada, tal como ya exige la Oficina de Copyright de EE. UU.</p></div>
+    <div class="card reveal"><span class="ic">🎓</span><h4>Nuestro rol como usuarios</h4><p>Citar fuentes, declarar el uso de IA y exigir herramientas que respeten a los creadores originales.</p></div>
+  </div>
+</section>
+
+<!-- outro -->
+<section class="section" id="outro">
+  <div class="eyebrow" style="justify-content:center;">Conclusion:</div>
+  <p class="outro-q reveal">"La creatividad siempre se ha construido sobre lo anterior. La pregunta no es si la IA copia, es cuánto le debemos reconocer a quien hizo posible que aprendiera."</p>
+  <div class="outro-tags reveal">
+    <span class="tag">#DerechosDeAutor</span>
+    <span class="tag">#InteligenciaArtificial</span>
+    <span class="tag">#ÉticaDigital</span>
+  </div>
+  <div class="credits" style="margin-bottom: 30px;"> · MUCHAS GRACIAS · </div>
+  <div class="eyebrow" style="justify-content: center;">Integrantes:</div>
+  <p class="spk-lead reveal" >- Briam. F. Leyva</p>
+  <p class="spk-lead reveal" >- Kevin Quinga</p>
+  <p class="spk-lead reveal" >- Jhon Redrovan</p>
+  <p class="spk-lead reveal" >- David Paucar</p>
+</section>
+
+<script>
+// scroll reveal
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); } });
+},{threshold:0.15});
+revealEls.forEach(el=>io.observe(el));
+
+// stagger cards inside a card-row
+document.querySelectorAll('.card-row').forEach(row=>{
+  [...row.children].forEach((c,i)=> c.style.transitionDelay = (i*0.09)+'s');
+});
+
+// progress bar
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', ()=>{
+  const h = document.documentElement;
+  const scrolled = (h.scrollTop)/(h.scrollHeight - h.clientHeight) * 100;
+  progress.style.width = scrolled + '%';
+});
+
+// nav active state
+const sections = document.querySelectorAll('.section');
+const navLinks = document.querySelectorAll('#nav a');
+const navObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      navLinks.forEach(l=>l.classList.remove('active'));
+      const id = entry.target.id;
+      const match = document.querySelector('#nav a[href="#'+id+'"]');
+      if(match) match.classList.add('active');
+    }
+  });
+},{threshold:0.5});
+sections.forEach(s=>navObserver.observe(s));
+
+// card mouse glow
+document.querySelectorAll('.card').forEach(card=>{
+  card.addEventListener('mousemove', e=>{
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', (e.clientX-r.left)+'px');
+    card.style.setProperty('--my', (e.clientY-r.top)+'px');
+  });
+});
+</script>
+</body>
+</html>
