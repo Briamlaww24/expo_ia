@@ -30,7 +30,6 @@ body{
   *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important;}
 }
 
-/* ---------- shared ---------- */
 .section{
   min-height:100vh;
   position:relative;
@@ -76,7 +75,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
 }
 ::selection{background:var(--violet); color:var(--ink);}
 
-/* ---------- progress bar ---------- */
 #progress{
   position:fixed; top:0; left:0; height:3px;
   background:linear-gradient(90deg,var(--violet),var(--cyan));
@@ -84,7 +82,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
   box-shadow:0 0 12px var(--cyan);
 }
 
-/* ---------- nav dots ---------- */
 #nav{
   position:fixed; right:26px; top:50%; transform:translateY(-50%);
   z-index:998; display:flex; flex-direction:column; gap:14px;
@@ -102,7 +99,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
 }
 #nav a:hover span{opacity:1;}
 
-/* ---------- HERO ---------- */
 #hero{
   align-items:center; text-align:center; background:
     radial-gradient(ellipse at 30% 20%, rgba(139,124,255,0.18), transparent 55%),
@@ -151,7 +147,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
 }
 .scroll-cue .line{width:1px; height:34px; background:linear-gradient(var(--cyan),transparent); animation:floaty 2s ease-in-out infinite;}
 
-/* ---------- speaker sections ---------- */
 .spk-head{
   display:flex; align-items:baseline; gap:1.4rem; flex-wrap:wrap;
 }
@@ -189,13 +184,11 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
 .card h4{font-size:1.02rem; margin-bottom:.5rem; font-weight:600;}
 .card p{font-size:.88rem; color:var(--text-dim); line-height:1.5;}
 
-/* section-specific accents */
 #s1{background:radial-gradient(circle at 85% 15%, rgba(139,124,255,0.12), transparent 50%);}
 #s2{background:radial-gradient(circle at 10% 85%, rgba(245,169,78,0.10), transparent 50%);}
 #s3{background:radial-gradient(circle at 90% 80%, rgba(63,232,207,0.12), transparent 50%);}
 #s4{background:radial-gradient(circle at 15% 20%, rgba(139,124,255,0.14), transparent 50%);}
 
-/* case chips for s3 */
 .case-strip{margin-top:2.6rem; display:flex; flex-wrap:wrap; gap:14px;}
 .case-chip{
   border:1px dashed var(--line); border-radius:12px; padding:1rem 1.3rem; min-width:190px; flex:1;
@@ -205,7 +198,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
 .case-chip .name{font-family:'Space Grotesk',sans-serif; font-size:1rem; margin-top:.3rem;}
 .case-chip .status{font-size:.72rem; color:var(--text-dim); margin-top:.4rem;}
 
-/* scales / vs visual for s2 */
 .balance{
   margin-top:3rem; display:flex; align-items:flex-end; justify-content:center; gap:0; max-width:600px;
 }
@@ -218,7 +210,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
 .balance .fulcrum{width:2px; align-self:stretch; background:var(--line); margin:0 -1px;}
 .balance .plate b{display:block; font-family:'Space Grotesk',sans-serif; font-size:1.3rem; margin-bottom:.5rem;}
 
-/* closing */
 #outro{align-items:center; text-align:center;}
 .outro-q{
   font-family:'Fraunces',serif; font-style:italic; font-weight:500;
@@ -231,7 +222,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
 }
 .credits{margin-top:4rem; font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--text-dim); letter-spacing:.08em;}
 
-/* ---------- illustration frame ---------- */
 .illo{
   margin-top:2.6rem; display:flex; justify-content:center;
 }
@@ -241,7 +231,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
 }
 @media(max-width:900px){ .illo-row{grid-template-columns:1fr;} }
 
-/* ---------- stat strip ---------- */
 .stat-row{
   margin-top:2.6rem; display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:18px;
 }
@@ -254,7 +243,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
 }
 .stat span{font-size:.78rem; color:var(--text-dim); font-family:'JetBrains Mono',monospace;}
 
-/* ---------- timeline ---------- */
 .timeline{
   margin-top:2.8rem; position:relative; padding-left:26px;
 }
@@ -271,7 +259,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
 .tl-item h5{font-size:.98rem; margin:.25rem 0 .2rem; font-weight:600;}
 .tl-item p{font-size:.85rem; color:var(--text-dim); max-width:520px;}
 
-/* floating particles canvas-less, pure css */
 .particle{
   position:absolute; border-radius:50%; background:var(--cyan); opacity:.5; filter:blur(1px);
   animation:floaty 6s ease-in-out infinite;
@@ -297,7 +284,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
   <a href="#outro" data-i="5"><span>Cierre</span></a>
 </nav>
 
-<!-- HERO -->
 <section class="section" id="hero">
   <div class="grid-overlay"></div>
   <div class="hero-mark">
@@ -329,7 +315,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
   <div class="scroll-cue"><div class="line"></div> ▼ </div>
 </section>
 
-<!-- 01 -->
 <section class="section" id="s1">
   <div class="spk-head reveal">
     <span class="spk-num">Briám Leyva  01/04</span>
@@ -382,7 +367,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
   </div>
 </section>
 
-<!-- 02 -->
 <section class="section" id="s2">
   <div class="spk-head reveal">
     <span class="spk-num">Kevin Quinga  02/04</span>
@@ -433,7 +417,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
   </div>
 </section>
 
-<!-- 03 -->
 <section class="section" id="s3">
   <div class="spk-head reveal">
     <span class="spk-num">Jhon Redrovan  03/04</span>
@@ -480,7 +463,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
   </div>
 </section>
 
-<!-- 04 -->
 <section class="section" id="s4">
   <div class="spk-head reveal">
     <span class="spk-num">David Paucar  04/04</span>
@@ -522,7 +504,6 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
   </div>
 </section>
 
-<!-- outro -->
 <section class="section" id="outro">
   <div class="eyebrow" style="justify-content:center;">Conclusion:</div>
   <p class="outro-q reveal">"La creatividad siempre se ha construido sobre lo anterior. La pregunta no es si la IA copia, es cuánto le debemos reconocer a quien hizo posible que aprendiera."</p>
@@ -540,19 +521,18 @@ h1,h2,h3{font-weight:600; letter-spacing:-0.02em;}
 </section>
 
 <script>
-// scroll reveal
+
 const revealEls = document.querySelectorAll('.reveal');
 const io = new IntersectionObserver((entries)=>{
   entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); } });
 },{threshold:0.15});
 revealEls.forEach(el=>io.observe(el));
 
-// stagger cards inside a card-row
+
 document.querySelectorAll('.card-row').forEach(row=>{
   [...row.children].forEach((c,i)=> c.style.transitionDelay = (i*0.09)+'s');
 });
 
-// progress bar
 const progress = document.getElementById('progress');
 window.addEventListener('scroll', ()=>{
   const h = document.documentElement;
@@ -560,7 +540,6 @@ window.addEventListener('scroll', ()=>{
   progress.style.width = scrolled + '%';
 });
 
-// nav active state
 const sections = document.querySelectorAll('.section');
 const navLinks = document.querySelectorAll('#nav a');
 const navObserver = new IntersectionObserver((entries)=>{
@@ -575,7 +554,6 @@ const navObserver = new IntersectionObserver((entries)=>{
 },{threshold:0.5});
 sections.forEach(s=>navObserver.observe(s));
 
-// card mouse glow
 document.querySelectorAll('.card').forEach(card=>{
   card.addEventListener('mousemove', e=>{
     const r = card.getBoundingClientRect();
