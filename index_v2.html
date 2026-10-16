@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Normalización de bases de datos · 1FN a FNBC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0c0a; --bg2:#141210; --card:rgba(255,248,235,.035); --line:rgba(255,240,215,.09); --line2:rgba(255,240,215,.18);
+  --text:#efe9dc; --dim:#a39b8b; --brass:#dcae62; --brass2:#f3d79b; --bad:#ec8576; --good:#93d6a4;
+  --serif:'Fraunces',Georgia,serif; --sans:'Hanken Grotesk',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  --rail:248px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:2rem}
+body{background:var(--bg);color:var(--text);font:400 1.02rem/1.65 var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--brass);color:#1a1307}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px;border-radius:4px}
+
+/* fondo ambiental */
+.ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+   radial-gradient(900px 600px at 78% -5%,rgba(220,174,98,.14),transparent 60%),
+   radial-gradient(700px 500px at 5% 70%,rgba(147,214,164,.05),transparent 60%),var(--bg)}
+.grain{position:fixed;inset:0;z-index:1000;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.spot{position:fixed;width:520px;height:520px;left:0;top:0;z-index:0;pointer-events:none;border-radius:50%;
+  background:radial-gradient(circle,rgba(243,215,155,.09),transparent 65%);transform:translate(-50%,-50%);transition:opacity .4s;opacity:0}
+#progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:1100;background:linear-gradient(90deg,var(--brass),var(--brass2))}
+
+/* riel lateral */
+.rail{position:fixed;inset:0 auto 0 0;width:var(--rail);padding:2.4rem 1.8rem;z-index:50;display:flex;flex-direction:column;justify-content:space-between;
+  border-right:1px solid var(--line);background:linear-gradient(90deg,rgba(13,12,10,.85),rgba(13,12,10,.4));backdrop-filter:blur(14px)}
+.brand{font:600 1.15rem/1.2 var(--serif)}
+.brand small{display:block;font:400 .78rem var(--sans);color:var(--dim);margin-top:.35rem}
+.rail ul{list-style:none;position:relative;margin:2rem 0}
+.rail ul::before{content:'';position:absolute;left:5px;top:8px;bottom:8px;width:1px;background:var(--line2)}
+.rail li a{position:relative;display:flex;gap:1rem;align-items:center;padding:.62rem 0;text-decoration:none;color:var(--dim);font-size:.92rem;transition:color .25s}
+.rail li a::before{content:'';width:11px;height:11px;border-radius:50%;background:var(--bg);border:1px solid var(--line2);flex:none;transition:.3s}
+.rail li a:hover{color:var(--text)}
+.rail li a.on{color:var(--brass2)}
+.rail li a.on::before{background:var(--brass);border-color:var(--brass);box-shadow:0 0 0 5px rgba(220,174,98,.16),0 0 14px rgba(220,174,98,.5)}
+.rail .foot{font-size:.78rem;color:var(--dim)}
+
+main{margin-left:var(--rail);position:relative;z-index:1}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(1.5rem,4vw,4rem)}
+section{padding:8rem 0;border-bottom:1px solid var(--line)}
+
+/* hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding:5rem 0}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:4rem;align-items:center}
+.boot{font:400 .82rem var(--mono);color:var(--good);display:grid;gap:.15rem;margin-bottom:1.8rem}
+.boot span{opacity:0;animation:in .5s forwards}
+.boot span:nth-child(2){animation-delay:.35s}.boot span:nth-child(3){animation-delay:.7s}
+.boot i{display:inline-block;width:.55em;height:1em;background:var(--brass);vertical-align:-2px;margin-left:5px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+@keyframes in{to{opacity:1}}
+h1{font:600 clamp(2.5rem,4.6vw,4.4rem)/1.04 var(--serif);letter-spacing:-.025em;font-variation-settings:'opsz' 144}
+h1 em{font-style:italic;font-weight:400;background:linear-gradient(100deg,var(--brass2),var(--brass));-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.08em}
+.sub{color:var(--dim);max-width:34rem;margin-top:1.6rem;font-size:1.08rem}
+.stats{display:flex;gap:2.8rem;margin-top:2.6rem;flex-wrap:wrap}
+.stats b{display:block;font:600 2.3rem/1 var(--serif);color:var(--brass2)}
+.stats span{font-size:.85rem;color:var(--dim)}
+.cta{display:inline-flex;align-items:center;gap:.6rem;margin-top:2.6rem;padding:.9rem 1.5rem;border-radius:999px;text-decoration:none;font-weight:600;color:#1a1307;
+  background:linear-gradient(120deg,var(--brass2),var(--brass));transition:transform .25s,box-shadow .25s}
+.cta:hover{transform:translateY(-2px);box-shadow:0 10px 30px -8px rgba(220,174,98,.55)}
+
+/* escalera de niveles (elemento memorable) */
+.stairs{display:grid;gap:.8rem}
+.stair{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center;text-decoration:none;padding:1.15rem 1.4rem;border:1px solid var(--line);border-radius:14px;background:var(--card);
+  transform-origin:left;opacity:0;animation:rise .8s cubic-bezier(.2,.8,.2,1) forwards;transition:border-color .3s,background .3s,translate .3s}
+.stair:nth-child(1){margin-right:3.6rem;animation-delay:.6s}.stair:nth-child(2){margin-right:2.4rem;animation-delay:.8s}
+.stair:nth-child(3){margin-right:1.2rem;animation-delay:1s}.stair:nth-child(4){animation-delay:1.2s;border-color:rgba(220,174,98,.4)}
+.stair:hover{border-color:var(--brass);background:rgba(220,174,98,.07);translate:6px 0}
+.stair .ab{font:600 1.7rem var(--serif);color:var(--brass2);min-width:3.4rem}
+.stair strong{display:block;font-weight:600;font-size:.98rem}
+.stair small{color:var(--dim);font-size:.84rem}
+@keyframes rise{from{opacity:0;transform:translateY(24px) scaleX(.94)}to{opacity:1;transform:none}}
+
+/* casos */
+.case-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:5rem;align-items:start}
+.side{position:sticky;top:3rem}
+.numeral{font:700 7.5rem/.9 var(--serif);color:transparent;-webkit-text-stroke:1px rgba(220,174,98,.45);margin-bottom:1rem}
+.kicker{color:var(--brass);font-size:.9rem;font-weight:500}
+h2{font:600 clamp(2rem,3.2vw,2.9rem)/1.08 var(--serif);letter-spacing:-.02em;margin:.5rem 0 1.2rem}
+.lead{color:var(--dim);max-width:30rem}
+.facts{margin-top:2rem;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
+.facts div{display:grid;grid-template-columns:7.5rem 1fr;gap:1rem;padding:.85rem 1.2rem;border-bottom:1px solid var(--line);font-size:.93rem}
+.facts div:last-child{border:0}
+.facts dt{color:var(--dim)}
+.facts dd.amber{color:var(--brass2)}.facts dd.red{color:var(--bad)}
+.author{display:flex;align-items:center;gap:.9rem;margin-top:1.8rem;font-size:.9rem;color:var(--dim)}
+.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font:600 .95rem var(--serif);color:#1a1307;background:linear-gradient(135deg,var(--brass2),var(--brass))}
+.author b{display:block;color:var(--text);font-weight:600}
+
+.steps{list-style:none;counter-reset:s;position:relative}
+.steps::before{content:'';position:absolute;left:17px;top:10px;bottom:10px;width:1px;background:linear-gradient(var(--line2),transparent)}
+.step{position:relative;padding:0 0 2.4rem 3.4rem;opacity:0;transform:translateY(18px);transition:opacity .7s,transform .7s}
+.step.in{opacity:1;transform:none}
+.step::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:35px;height:35px;border-radius:50%;display:grid;place-items:center;
+  background:var(--bg);border:1px solid var(--brass);color:var(--brass2);font:500 .85rem var(--mono)}
+.step h3{font:600 1.25rem/1.3 var(--serif);margin-bottom:.35rem}
+.step p{color:var(--dim)}
+.ex{margin-top:1.1rem;padding:1.1rem 1.2rem 0;border-radius:14px;border:1px solid var(--line);background:var(--bg2);overflow-x:auto}
+.pill{display:inline-block;margin-bottom:.9rem;padding:.2rem .75rem;border-radius:999px;font-size:.8rem;font-weight:600}
+.pill.bad{color:var(--bad);background:rgba(236,133,118,.12);border:1px solid rgba(236,133,118,.3)}
+.pill.good{color:var(--good);background:rgba(147,214,164,.1);border:1px solid rgba(147,214,164,.3)}
+.ex.bad{border-color:rgba(236,133,118,.25)}.ex.good{border-color:rgba(147,214,164,.25)}
+table{border-collapse:separate;border-spacing:0;font:400 .82rem var(--mono);margin-bottom:1.1rem;min-width:50%;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{padding:.55rem .95rem;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+th{background:rgba(220,174,98,.09);color:var(--brass2);font-weight:500}
+th.pk{text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--brass)}
+td.bad{color:var(--bad);background:rgba(236,133,118,.08)}
+tbody tr{transition:background .2s}tbody tr:hover{background:rgba(255,240,215,.03)}
+.why{margin-top:.8rem;padding:1.4rem 1.6rem;border-radius:14px;border:1px solid var(--line);border-left:3px solid var(--brass);background:linear-gradient(100deg,rgba(220,174,98,.08),transparent);color:var(--dim)}
+.why b{color:var(--brass2);font-weight:600}
+
+/* conclusión */
+#outro{border:0;padding-bottom:6rem}
+.quote{font:400 clamp(1.7rem,3vw,2.6rem)/1.3 var(--serif);max-width:52rem;letter-spacing:-.015em}
+.quote em{font-style:italic;color:var(--brass2)}
+.tags{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:2rem}
+.tags span{padding:.35rem .9rem;border:1px solid var(--line2);border-radius:999px;font-size:.85rem;color:var(--dim)}
+.team{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:4rem}
+.member{padding:1.6rem;border:1px solid var(--line);border-radius:16px;background:var(--card);transition:border-color .3s,transform .3s,box-shadow .3s}
+.member:hover{border-color:rgba(220,174,98,.5);transform:translateY(-4px);box-shadow:0 18px 40px -20px rgba(220,174,98,.35)}
+.member .avatar{width:52px;height:52px;font-size:1.1rem;margin-bottom:1rem}
+.member b{display:block;font-weight:600}.member small{color:var(--dim)}
+.credits{margin-top:3rem;color:var(--dim);font-size:.9rem}
+
+/* responsive */
+@media(max-width:1180px){.case-grid{gap:3rem}.team{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:980px){
+  .rail{display:none}main{margin-left:0}
+  .hero-grid,.case-grid{grid-template-columns:1fr}.side{position:static}
+  section{padding:5rem 0}.numeral{font-size:5rem}
+}
+@media(max-width:520px){.team{grid-template-columns:1fr}.facts div{grid-template-columns:1fr;gap:.1rem}}
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .step,.stair,.boot span{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<div class="ambient"></div><div class="grain"></div><div class="spot" id="spot"></div><div id="progress"></div>
+
+<aside class="rail">
+  <div class="brand">Normalización<small>Bases de datos · 1FN a FNBC</small></div>
+  <ul id="nav"></ul>
+  <div class="foot">Equipo de 4 integrantes</div>
+</aside>
+
+<main>
+  <section id="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="boot"><span>&gt; Iniciando archivo de casos…<i></i></span><span>&gt; Redundancia detectada en la base de datos</span><span>&gt; Cargando las 4 formas normales</span></div>
+        <h1>Normalización de <em>bases de datos</em>: las 4 formas que ordenan la información</h1>
+        <p class="sub">Las cuatro formas principales de normalización son la 1FN, 2FN, 3FN y la Forma Normal de Boyce-Codd (FNBC), diseñadas progresivamente para eliminar la redundancia y garantizar la integridad de los datos.</p>
+        <div class="stats">
+          <div><b data-n="4">0</b><span>integrantes</span></div>
+          <div><b data-n="4">0</b><span>formas normales</span></div>
+          <div><b data-n="1">0</b><span>objetivo: integridad</span></div>
+        </div>
+        <a class="cta" href="#c1">Empezar por la 1FN</a>
+      </div>
+      <nav class="stairs" id="stairs" aria-label="Niveles de normalización"></nav>
+    </div>
+  </section>
+  <div id="cases"></div>
+  <section id="outro">
+    <div class="wrap">
+      <p class="quote">De la 1FN a la FNBC, el camino es el mismo: <em>cada forma normal elimina un tipo de redundancia y acerca los datos a la integridad</em>. Normalizar no es complicar la base de datos, es hacerla confiable.</p>
+      <div class="tags"><span>#BasesDeDatos</span><span>#Normalización</span><span>#IntegridadDeDatos</span></div>
+      <div class="team" id="team"></div>
+      <p class="credits">Muchas gracias.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+/* ---------- Datos (el contenido vive aquí; el HTML se genera) ----------
+   En tablas: encabezado terminado en * = clave primaria · celda que empieza con ! = dato problemático */
+const CASES = [
+ {id:'c1',n:'01',who:'Briam Leyva',ab:'1FN',kicker:'Nivel 1 · El primer orden',title:'Primera Forma Normal',
+  lead:'La base de todo. Elimina los grupos repetitivos asegurando que cada columna contenga valores atómicos (indivisibles) y que cada fila sea única mediante una clave primaria.',
+  facts:[['Elimina','Grupos repetitivos','red'],['Columnas','Valores atómicos (indivisibles)','amber'],['Filas','Únicas mediante clave primaria'],['Requisito previo','Ninguno']],
+  steps:[
+   {t:'El problema',p:'Una tabla guarda varios valores en una sola celda, por ejemplo varios teléfonos de un cliente separados por comas.',ex:{ok:0,l:'No cumple 1FN',tb:[[['id_cliente','nombre','teléfonos'],[['1','Ana','!0991111, 0982222']]]]}},
+   {t:'Detectar grupos repetitivos',p:'Se identifican las columnas con más de un valor o repetidas (tel1, tel2, tel3), que dificultan buscar, actualizar y borrar datos.'},
+   {t:'Hacer los valores atómicos',p:'Cada celda debe contener un único valor indivisible. Cada teléfono pasa a ocupar su propia fila.'},
+   {t:'Definir la clave primaria',p:'Se elige una clave primaria que identifique cada fila de forma única, sin duplicados.'},
+   {t:'Resultado',p:'La tabla ya cumple 1FN.',ex:{ok:1,l:'Cumple 1FN',tb:[[['id_cliente*','teléfono*','nombre'],[['1','0991111','Ana'],['1','0982222','Ana']]]]}}],
+  why:'sin 1FN no se puede ni buscar ni filtrar bien. Pero ordenar las celdas no basta: ahora el nombre "Ana" se repite en cada fila. Para eso existe el siguiente nivel, que trata la relación entre los atributos y la clave.'},
+ {id:'c2',n:'02',who:'Kevin Quinga',ab:'2FN',kicker:'Nivel 2 · Dependencia completa',title:'Segunda Forma Normal',
+  lead:'Cumple con la 1FN y elimina las dependencias parciales, asegurando que todos los atributos que no forman parte de la clave dependan por completo de toda la clave primaria.',
+  facts:[['Requisito previo','Cumplir 1FN','amber'],['Elimina','Dependencias parciales','red'],['Regla','Todo atributo depende de TODA la clave'],['Aplica a','Principalmente claves compuestas']],
+  steps:[
+   {t:'El problema',p:'La clave primaria es compuesta (id_pedido + id_producto), pero el nombre del producto solo depende de id_producto.',ex:{ok:0,l:'No cumple 2FN',tb:[[['id_pedido*','id_producto*','cantidad','nombre_producto'],[['10','5','2','!Teclado'],['11','5','1','!Teclado']]]]}},
+   {t:'Verificar 1FN',p:'Antes de pasar a 2FN, la tabla ya debe tener valores atómicos y una clave primaria definida.'},
+   {t:'Detectar la dependencia parcial',p:'nombre_producto depende solo de una parte de la clave (id_producto), no de la clave completa. Resultado: "Teclado" se repite en cada pedido.'},
+   {t:'Separar en tablas',p:'Los atributos que dependen de una parte de la clave pasan a su propia tabla, y se enlazan con una clave foránea.'},
+   {t:'Resultado',p:'Cada dato vive en un solo lugar.',ex:{ok:1,l:'Cumple 2FN',tb:[[['id_pedido*','id_producto*','cantidad'],[['10','5','2'],['11','5','1']]],[['id_producto*','nombre_producto'],[['5','Teclado']]]]}}],
+  why:'si el producto cambia de nombre, ahora se modifica en un solo lugar. Si la clave no es compuesta, la 2FN se cumple automáticamente. Pero aún queda otro tipo de dependencia oculta: la que pasa a través de un atributo intermedio.'},
+ {id:'c3',n:'03',who:'Pedro Gualoto',ab:'3FN',kicker:'Nivel 3 · Solo la clave',title:'Tercera Forma Normal',
+  lead:'Cumple con la 2FN y elimina las dependencias transitivas, garantizando que los atributos no clave dependan únicamente de la clave primaria y no de otros atributos que no sean clave.',
+  facts:[['Requisito previo','Cumplir 2FN','amber'],['Elimina','Dependencias transitivas','red'],['Regla','Atributos no clave dependen solo de la clave'],['Idea clave','A → B → C: C no debe colgar de B']],
+  steps:[
+   {t:'El problema',p:'En la tabla de empleados, el nombre del departamento depende del id_departamento, que a su vez depende del empleado.',ex:{ok:0,l:'No cumple 3FN',tb:[[['id_empleado*','nombre','id_depto','nombre_depto'],[['1','Luis','7','!Ventas'],['2','María','7','!Ventas']]]]}},
+   {t:'Verificar 2FN',p:'La tabla debe estar en 2FN antes de revisar las dependencias transitivas.'},
+   {t:'Detectar la dependencia transitiva',p:'id_empleado → id_depto → nombre_depto. El nombre del departamento no depende directamente de la clave primaria, sino de otro atributo que no es clave.'},
+   {t:'Mover los atributos a su propia tabla',p:'Los atributos que dependen de un atributo no clave se llevan a una tabla nueva, conservando el id_depto como clave foránea.'},
+   {t:'Resultado',p:'Si "Ventas" cambia de nombre, se actualiza una sola fila.',ex:{ok:1,l:'Cumple 3FN',tb:[[['id_empleado*','nombre','id_depto'],[['1','Luis','7'],['2','María','7']]],[['id_depto*','nombre_depto'],[['7','Ventas']]]]}}],
+  why:'para la mayoría de aplicaciones, llegar a 3FN es suficiente. Pero en casos especiales, con varias claves candidatas que se solapan, todavía pueden quedar anomalías. Ahí entra la versión más estricta.'},
+ {id:'c4',n:'04',who:'David Paucar',ab:'FNBC',kicker:'Nivel 4 · La más estricta',title:'Forma Normal de Boyce-Codd',
+  lead:'Es una versión más estricta de la 3FN que exige que, para cada dependencia funcional existente, el determinante sea obligatoriamente una superclave de la tabla.',
+  facts:[['Requisito previo','Cumplir 3FN','amber'],['Regla','Todo determinante debe ser superclave','red'],['Es','Una 3FN más estricta'],['Aparece cuando','Hay claves candidatas que se solapan']],
+  steps:[
+   {t:'El problema',p:'En una tabla de tutorías, cada profesor enseña una sola materia (profesor → materia), pero profesor no es superclave de la tabla.',ex:{ok:0,l:'No cumple FNBC',tb:[[['estudiante*','materia*','profesor'],[['Ana','Bases de Datos','!Pérez'],['Luis','Bases de Datos','!Pérez']]]]}},
+   {t:'Listar las dependencias funcionales',p:'Se identifican todas: (estudiante, materia) → profesor y profesor → materia.'},
+   {t:'Revisar cada determinante',p:'El lado izquierdo de cada dependencia debe ser una superclave. Aquí "profesor" determina la materia pero no identifica la fila completa: se viola la FNBC.'},
+   {t:'Descomponer la tabla',p:'Se separa para que cada determinante sea clave en su propia tabla, sin perder información.'},
+   {t:'Resultado',p:'Cada dependencia queda respaldada por una superclave.',ex:{ok:1,l:'Cumple FNBC',tb:[[['profesor*','materia'],[['Pérez','Bases de Datos']]],[['estudiante*','profesor*'],[['Ana','Pérez'],['Luis','Pérez']]]]}}],
+  why:'la FNBC cierra el ciclo: cada forma normal incluye a la anterior y es más exigente. Una base de datos normalizada evita duplicados, errores al actualizar y datos contradictorios.'}
+];
+const STAIR_SUB = ['Valores atómicos y clave primaria','Sin dependencias parciales','Sin dependencias transitivas','Todo determinante es superclave'];
+const initials = s => s.split(' ').map(w=>w[0]).join('');
+
+/* ---------- Render ---------- */
+const table = ([head,rows]) => `<table><thead><tr>${head.map(h=>h.endsWith('*')?`<th class="pk">${h.slice(0,-1)}</th>`:`<th>${h}</th>`).join('')}</tr></thead><tbody>${
+  rows.map(r=>`<tr>${r.map(c=>c.startsWith('!')?`<td class="bad">${c.slice(1)}</td>`:`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+
+document.getElementById('stairs').innerHTML = CASES.map((c,i)=>
+  `<a class="stair" href="#${c.id}"><span class="ab">${c.ab}</span><span><strong>${c.title}</strong><small>${STAIR_SUB[i]}</small></span></a>`).join('');
+
+document.getElementById('cases').innerHTML = CASES.map(c=>`
+<section id="${c.id}"><div class="wrap case-grid">
+  <header class="side">
+    <div class="numeral">${c.n}</div>
+    <div class="kicker">${c.kicker}</div>
+    <h2>${c.title} (${c.ab})</h2>
+    <p class="lead">${c.lead}</p>
+    <dl class="facts">${c.facts.map(f=>`<div><dt>${f[0]}</dt><dd class="${f[2]||''}">${f[1]}</dd></div>`).join('')}</dl>
+    <div class="author"><span class="avatar">${initials(c.who)}</span><span>Presenta<b>${c.who}</b></span></div>
+  </header>
+  <div>
+    <ol class="steps">${c.steps.map(s=>`
+      <li class="step"><h3>${s.t}</h3><p>${s.p}</p>${s.ex?`
+        <div class="ex ${s.ex.ok?'good':'bad'}"><span class="pill ${s.ex.ok?'good':'bad'}">${s.ex.ok?'✓':'✗'} ${s.ex.l}</span><br>${s.ex.tb.map(table).join('')}</div>`:''}
+      </li>`).join('')}
+    </ol>
+    <div class="why"><b>Por qué importa:</b> ${c.why}</div>
+  </div>
+</div></section>`).join('');
+
+document.getElementById('team').innerHTML = CASES.map(c=>
+  `<div class="member"><span class="avatar">${initials(c.who)}</span><b>${c.who}</b><small>${c.title} (${c.ab})</small></div>`).join('');
+
+const NAV = [['hero','Inicio'],...CASES.map(c=>[c.id,`${c.title.replace(' Forma Normal','')} · ${c.ab}`.replace('Forma Normal de ','')]),['outro','Conclusión']];
+document.getElementById('nav').innerHTML = NAV.map(n=>`<li><a href="#${n[0]}">${n[1]}</a></li>`).join('');
+
+/* ---------- Interacción ---------- */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const io = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.15});
+document.querySelectorAll('.step').forEach(el=>io.observe(el));
+
+const links = [...document.querySelectorAll('#nav a')];
+const so = new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting) links.forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id));
+}),{rootMargin:'-45% 0px -50% 0px'});
+document.querySelectorAll('main section').forEach(s=>so.observe(s));
+
+const bar = document.getElementById('progress'), de = document.documentElement;
+addEventListener('scroll',()=>{bar.style.width = de.scrollTop/(de.scrollHeight-de.clientHeight)*100+'%';},{passive:true});
+
+const spot = document.getElementById('spot');
+if(!reduce && matchMedia('(pointer:fine)').matches){
+  addEventListener('pointermove',e=>{spot.style.opacity=1;spot.style.left=e.clientX+'px';spot.style.top=e.clientY+'px';},{passive:true});
+}
+
+document.querySelectorAll('[data-n]').forEach(el=>{
+  const end=+el.dataset.n; if(reduce){el.textContent=end;return;}
+  let i=0; const t=setInterval(()=>{el.textContent=++i; if(i>=end)clearInterval(t);},260);
+});
+</script>
+</body>
+</html>
