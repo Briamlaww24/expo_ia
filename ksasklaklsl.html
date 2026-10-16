@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expedientes de Ciberataque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0904;
+  --panel:#131109;
+  --panel-2:#1b1810;
+  --amber:#ffb454;
+  --amber-dim:#8a6a35;
+  --red:#ff5c5c;
+  --green:#7ee68a;
+  --text:#eee6d3;
+  --text-dim:#8a8270;
+  --line:#332c1c;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'IBM Plex Mono',monospace;
+  overflow-x:hidden;
+  position:relative;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important;}
+}
+::selection{background:var(--amber); color:var(--bg);}
+
+/* CRT scanline overlay */
+#scan{
+  position:fixed; inset:0; pointer-events:none; z-index:900; opacity:.5;
+  background:repeating-linear-gradient(to bottom, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px);
+}
+#vignette{
+  position:fixed; inset:0; pointer-events:none; z-index:899;
+  background:radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
+}
+@keyframes flicker{
+  0%,100%{opacity:1;} 92%{opacity:1;} 93%{opacity:.86;} 94%{opacity:1;} 96%{opacity:.9;} 97%{opacity:1;}
+}
+body{animation:flicker 7s infinite;}
+
+/* progress */
+#progress{position:fixed; top:0; left:0; height:2px; background:var(--amber); z-index:999; width:0%; box-shadow:0 0 8px var(--amber);}
+
+h1,h2,h3{font-family:'IBM Plex Mono',monospace; letter-spacing:-0.01em;}
+.stamp{font-family:'Archivo Black',sans-serif;}
+.reveal{opacity:0; transform:translateY(22px); transition:opacity .7s ease, transform .7s ease;}
+.reveal.in{opacity:1; transform:translateY(0);}
+@keyframes blink{0%,49%{opacity:1;} 50%,100%{opacity:0;}}
+.cursor{display:inline-block; width:.5em; height:1em; background:var(--amber); vertical-align:middle; animation:blink 1s step-end infinite; margin-left:4px;}
+@keyframes typewriter{from{width:0;} to{width:100%;}}
+
+/* nav */
+#nav{
+  position:fixed; left:0; top:0; height:100%; width:64px; z-index:950;
+  border-right:1px solid var(--line); background:rgba(10,9,4,.7); backdrop-filter:blur(4px);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px;
+}
+#nav a{
+  writing-mode:vertical-rl; text-orientation:mixed; color:var(--text-dim); text-decoration:none;
+  font-size:.68rem; letter-spacing:.15em; padding:6px 0; border-left:2px solid transparent; transition:.25s;
+}
+#nav a.active, #nav a:hover{color:var(--amber); border-left-color:var(--amber);}
+@media(max-width:760px){ #nav{display:none;} }
+
+.wrap{max-width:920px; margin:0 auto; padding:0 8vw;}
+@media(max-width:760px){ .wrap{padding:0 6vw;} }
+
+.section{
+  min-height:100vh; position:relative; padding:10vh 0 10vh 64px; border-bottom:1px solid var(--line);
+}
+@media(max-width:760px){ .section{padding-left:0;} }
+
+/* dossier top strip */
+.case-strip{
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+  font-size:.72rem; color:var(--text-dim); letter-spacing:.08em; border-bottom:1px dashed var(--line);
+  padding-bottom:14px; margin-bottom:2.4rem;
+}
+.case-strip .tag{color:var(--amber);}
+.classified{
+  display:inline-block; border:2px solid var(--red); color:var(--red); padding:2px 10px;
+  font-family:'Archivo Black',sans-serif; font-size:.68rem; letter-spacing:.1em; transform:rotate(-2deg);
+}
+
+/* ---------- HERO ---------- */
+#hero{
+  display:flex; flex-direction:column; justify-content:center; min-height:100vh;
+  background:
+    radial-gradient(ellipse 700px 500px at 30% 20%, rgba(255,180,84,0.08), transparent 60%),
+    var(--bg);
+}
+.boot-line{font-size:.82rem; color:var(--green); opacity:.85; margin-bottom:4px;}
+.hero-title{
+  font-size:clamp(2.1rem,6.4vw,4.4rem); font-weight:700; margin:1.2rem 0 1rem; line-height:1.05;
+  color:var(--text);
+}
+.hero-title .hl{color:var(--amber);}
+.hero-sub{color:var(--text-dim); max-width:600px; font-size:1rem; line-height:1.6;}
+.hero-meta{
+  margin-top:2.6rem; display:flex; gap:2.2rem; flex-wrap:wrap; font-size:.78rem; color:var(--text-dim);
+}
+.hero-meta b{color:var(--amber);}
+.file-index{
+  margin-top:3rem; display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; max-width:720px;
+}
+.file-index a{
+  display:block; text-decoration:none; border:1px solid var(--line); padding:.9rem 1rem; color:var(--text);
+  font-size:.78rem; transition:.25s; position:relative;
+}
+.file-index a:hover{border-color:var(--amber); background:var(--panel);}
+.file-index a .fnum{color:var(--amber); display:block; font-size:.7rem; margin-bottom:.3rem;}
+
+/* ---------- section headers ---------- */
+.case-head{margin-bottom:1.6rem;}
+.case-year{font-size:.8rem; color:var(--amber); letter-spacing:.15em;}
+.case-title{font-size:clamp(1.7rem,4.4vw,2.6rem); font-weight:700; margin-top:.4rem; line-height:1.1;}
+.case-lead{color:var(--text-dim); margin-top:1rem; max-width:640px; line-height:1.65; font-size:.95rem;}
+
+/* dossier fact grid */
+.fact-grid{
+  margin-top:2.2rem; display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:1px;
+  background:var(--line); border:1px solid var(--line);
+}
+.fact{background:var(--panel); padding:1.1rem 1.2rem;}
+.fact .k{font-size:.66rem; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase;}
+.fact .v{font-size:1rem; color:var(--text); margin-top:.4rem; line-height:1.4;}
+.fact .v.amber{color:var(--amber);}
+.fact .v.red{color:var(--red);}
+
+/* redacted lines decorative */
+.redacted{
+  display:inline-block; background:var(--text); color:var(--text); border-radius:2px; user-select:none;
+}
+
+/* attack chain / timeline within case */
+.chain{margin-top:2.4rem;}
+.chain-step{
+  display:grid; grid-template-columns:26px 1fr; gap:14px; padding-bottom:1.5rem; position:relative;
+}
+.chain-step::before{
+  content:''; position:absolute; left:11px; top:22px; bottom:0; width:1px; background:var(--line);
+}
+.chain-step:last-child::before{display:none;}
+.chain-dot{width:24px; height:24px; border:1px solid var(--amber); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.62rem; color:var(--amber); background:var(--bg); z-index:1;}
+.chain-body h5{font-size:.92rem; margin-bottom:.3rem; color:var(--text);}
+.chain-body p{font-size:.85rem; color:var(--text-dim); line-height:1.55;}
+
+/* connector note between cases */
+.connector{
+  margin:2.6rem 0 0; padding:1.2rem 1.4rem; border-left:2px solid var(--amber); background:var(--panel);
+  font-size:.85rem; color:var(--text-dim); line-height:1.6;
+}
+.connector b{color:var(--amber);}
+
+/* illustration */
+.illo{margin:2.4rem 0; display:flex; justify-content:center;}
+.illo svg{width:100%; max-width:420px; height:auto;}
+
+/* outro */
+#outro{min-height:80vh; display:flex; flex-direction:column; justify-content:center;}
+.outro-q{font-size:clamp(1.3rem,3.6vw,2rem); max-width:760px; line-height:1.5; color:var(--text);}
+.outro-q .hl{color:var(--amber);}
+.tag-row{margin-top:2rem; display:flex; gap:10px; flex-wrap:wrap;}
+.tagp{border:1px solid var(--line); padding:.4rem .9rem; font-size:.72rem; color:var(--text-dim);}
+.credits{margin-top:3rem; font-size:.68rem; color:var(--text-dim); letter-spacing:.08em;}
+
+@media(max-width:760px){
+  .case-strip{flex-direction:column; align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+
+<div id="scan"></div>
+<div id="vignette"></div>
+<div id="progress"></div>
+
+<nav id="nav">
+  <a href="#hero" data-i="0">00 · INICIO</a>
+  <a href="#c1" data-i="1">01 · MICHELANGELO</a>
+  <a href="#c2" data-i="2">02 · HACKEO A NVIDIA</a>
+  <a href="#c3" data-i="3">03 · RIOT GAMES</a>
+  <a href="#c4" data-i="4">04 · PEGASUS</a>
+  <a href="#outro" data-i="5">05 · CONCLUSION</a>
+</nav>
+
+<!-- HERO -->
+<section class="section" id="hero" style="border-bottom:1px solid var(--line);">
+  <div class="wrap">
+    <div class="boot-line reveal in">&gt; INICIANDO ARCHIVO DE CASOS...<span class="cursor"></span></div>
+    <div class="boot-line reveal in" style="transition-delay:.15s;">&gt; ESTADO DE LA RED: ESTABLE...</div>
+    <div class="boot-line reveal in" style="transition-delay:.3s;">&gt; CARGANDO LOS 4 ARCHIVOS...</div>
+    <h1 class="hero-title reveal in" style="transition-delay:.45s;">Malware y <span class="hl">ciberataques</span>:<br>cuatro casos que<br>cambiaron las reglas</h1>
+    <p class="hero-sub reveal in" style="transition-delay:.6s;">Desde un virus que solo quería asustar al mundo, a un software capaz de espiar un teléfono sin que su dueño se entere. Un recorrido por casos del malware que cambiaron la ciberseguridad para siempre.</p>
+    <div class="hero-meta reveal in" style="transition-delay:.75s;">
+      <div><b>4</b> integrantes</div>
+      <div><b>4</b> incidentes</div>
+      <div><b>4</b> riesgos de seguridad</div>
+    </div>
+    <div class="file-index reveal in" style="transition-delay:.9s;">
+      <a href="#c1"><span class="fnum">EXPEDIENTE 01 — 1992</span>Virus Michelangelo</a>
+      <a href="#c2"><span class="fnum">EXPEDIENTE 02 — 2022</span>Hackeo a NVIDIA</a>
+      <a href="#c3"><span class="fnum">EXPEDIENTE 03 — 2023</span>Riot Games</a>
+      <a href="#c4"><span class="fnum">EXPEDIENTE 04 — 2016–hoy</span>Pegasus / NSO Group</a>
+    </div>
+  </div>
+</section>
+
+<!-- CASE 1: MICHELANGELO -->
+<section class="section" id="c1">
+  <div class="wrap">
+    <div class="case-strip">
+      <span class="tag">CASO #01 - JHON REDROVAN</span>
+      <span class="classified">DESCLASIFICADO</span>
+    </div>
+    <div class="case-head reveal">
+      <div class="case-year">06 MARZO 1992 · EL ORIGEN DEL PÁNICO</div>
+      <h2 class="case-title">El virus Michelangelo</h2>
+      <p class="case-lead">Antes de que existiera internet como la conocemos, un virus de disquete logró algo que ningún malware había hecho, sembrar pánico mundial semanas antes de siquiera activarse.</p>
+    </div>
+
+    <div class="fact-grid reveal">
+      <div class="fact"><div class="k">Tipo</div><div class="v">Virus de sector de arranque</div></div>
+      <div class="fact"><div class="k">Propagación</div><div class="v">Disquetes infectados</div></div>
+      <div class="fact"><div class="k">Detonante</div><div class="v amber">6 de marzo (cumpleaños de Miguel Ángel)</div></div>
+      <div class="fact"><div class="k">Estimación mediática</div><div class="v red">5 millones de PC "en riesgo"</div></div>
+    </div>
+
+    <div class="chain reveal">
+      <div class="chain-step"><div class="chain-dot">1</div><div class="chain-body"><h5>Infección silenciosa (1991)</h5><p>Un dueño de tienda de computadoras en Australia detecta símbolos extraños en pantalla: el primer indicio del virus, oculto en el sector de arranque del disco duro.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">2</div><div class="chain-body"><h5>Distribución accidental</h5><p>Varias empresas incluida Intel envían discos y hasta computadoras nuevas ya infectadas de fábrica, sin saberlo, acelerando el contagio.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">3</div><div class="chain-body"><h5>La bomba de tiempo</h5><p>El virus permanece dormido todo el año. Cada 6 de marzo, si la computadora se enciende, sobrescribe los primeros sectores del disco duro y borra los datos.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">4</div><div class="chain-body"><h5>El pánico mediático</h5><p>John McAfee, fundador de la empresa antivirus, estima públicamente que hasta 5 millones de computadoras podrían perder sus datos. Gobiernos y medios de todo el mundo cubren la noticia como una amenaza inminente.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">5</div><div class="chain-body"><h5>El día después</h5><p>El 6 de marzo de 1992 llega. El daño real es muy inferior al esperado, entre 10.000 y 20.000 casos de pérdida de datos, muy lejos de los millones anunciados.</p></div></div>
+    </div>
+
+    <div class="connector reveal">
+      <b>Por qué importa hoy:</b> Michelangelo fue el primer caso de un fenómeno que se repetiría una y otra vez: el miedo a un ciberataque puede ser tan poderoso como el ataque mismo. También impulsó el nacimiento de la industria antivirus tal como la conocemos. Tres décadas después, los ataques dejaron de necesitar un disquete físico pq pasaron a viajar por la nube, directo al corazón de las empresas de tecnología más grandes del mundo.
+    </div>
+  </div>
+</section>
+
+<!-- CASE 2: NVIDIA -->
+<section class="section" id="c2">
+  <div class="wrap">
+    <div class="case-strip">
+      <span class="tag">CASO #02 - DAVID PAUCAR</span>
+      <span class="classified">DESCLASIFICADO</span>
+    </div>
+    <div class="case-head reveal">
+      <div class="case-year">FEBRERO 2022 · LA CADENA DE CONFIANZA ROTA</div>
+      <h2 class="case-title">El hackeo a NVIDIA</h2>
+      <p class="case-lead">Treinta años después de Michelangelo, un grupo de extorsión llamado Lapsus$ no solo robó datos de una de las empresas de tecnología más valiosas del mundo: robó las llaves que hacían confiable su software.</p>
+    </div>
+
+    <div class="fact-grid reveal">
+      <div class="fact"><div class="k">Responsable</div><div class="v amber">Grupo Lapsus$</div></div>
+      <div class="fact"><div class="k">Datos robados</div><div class="v">+1 TB, incluidas credenciales de empleados</div></div>
+      <div class="fact"><div class="k">Exigencia</div><div class="v">Eliminar el límite de minado en tarjetas RTX 30??</div></div>
+      <div class="fact"><div class="k">Arma filtrada</div><div class="v red">2 certificados de firma de código</div></div>
+    </div>
+
+    <div class="chain reveal">
+      <div class="chain-step"><div class="chain-dot">1</div><div class="chain-body"><h5>Intrusión</h5><p>Lapsus$ afirma haber estado dentro de los sistemas de NVIDIA durante una semana antes de ser detectado, robando cerca de 1 TB de información interna.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">2</div><div class="chain-body"><h5>Extorsión</h5><p>El grupo exige a NVIDIA eliminar el límite de rendimiento para minería de criptomonedas (LHR) de sus tarjetas gráficas RTX 30??, a cambio de no filtrar los datos.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">3</div><div class="chain-body"><h5>NVIDIA se niega a negociar</h5><p>La empresa no cede a la extorsión. Lapsus$ cumple su amenaza y publica los datos robados en un sitio de filtraciones.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">4</div><div class="chain-body"><h5>El verdadero peligro sale a la luz</h5><p>Entre los archivos filtrados hay dos certificados de firma de código que NVIDIA usaba para autenticar sus controladores. Aunque estaban vencidos, Windows seguía aceptándolos.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">5</div><div class="chain-body"><h5>Reacción en cadena</h5><p>En cuestión de días, otros atacantes empiezan a usar esos certificados para firmar malware, incluyendo Mimikatz y troyanos de acceso remoto haciendo que Windows los reconozca como software "confiable".</p></div></div>
+    </div>
+
+    <div class="connector reveal">
+      <b>Por qué importa hoy:</b> Este caso mostró que robar datos ya no es el único objetivo, sino robar la <i>confianza digital</i> misma certificados, credenciales e infraestructura puede armar a cualquier otro criminal durante años. Y el método de entrada más común para este tipo de grupos, como veremos a continuación, casi nunca es una falla técnica sino que es una persona.
+    </div>
+  </div>
+</section>
+
+<!-- CASE 3: RIOT GAMES -->
+<section class="section" id="c3">
+  <div class="wrap">
+    <div class="case-strip">
+      <span class="tag">CASO #03 - KEVIN GUINGA</span>
+      <span class="classified">DESCLASIFICADO</span>
+    </div>
+    <div class="case-head reveal">
+      <div class="case-year">ENERO 2023 · EL ESLABÓN HUMANO</div>
+      <h2 class="case-title">El hackeo a Riot Games</h2>
+      <p class="case-lead">Ni un virus de disquete ni un certificado robado esta vez la puerta de entrada fue un simple mensaje de texto a un empleado. La creadora de League of Legends y Valorant aprendió por las malas que la ciberseguridad también es psicología.</p>
+    </div>
+
+    <div class="fact-grid reveal">
+      <div class="fact"><div class="k">Vector de ataque</div><div class="v amber">Ingeniería social vía SMS</div></div>
+      <div class="fact"><div class="k">Robado</div><div class="v">Código fuente de LoL, TFT y anti-cheat</div></div>
+      <div class="fact"><div class="k">Rescate exigido</div><div class="v red">10 millones de dólares</div></div>
+      <div class="fact"><div class="k">Respuesta de Riot</div><div class="v">No pagó</div></div>
+    </div>
+
+    <div class="chain reveal">
+      <div class="chain-step"><div class="chain-dot">1</div><div class="chain-body"><h5>Reconocimiento</h5><p>El atacante obtiene el número telefónico de un empleado de Riot Games expuesto previamente, y lo usa como punto de partida.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">2</div><div class="chain-body"><h5>Ingeniería social</h5><p>Mediante un mensaje de texto (SMS), el atacante engaña al empleado para obtener acceso al entorno de desarrollo interno de la compañía. No hubo que "romper" ningún sistema bastó con engañar a una persona.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">3</div><div class="chain-body"><h5>Exfiltración</h5><p>Con ese acceso, los atacantes roban el código fuente de League of Legends, Teamfight Tactics y una plataforma anti-trampas heredada, incluyendo funciones aún no publicadas.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">4</div><div class="chain-body"><h5>Extorsión directa</h5><p>Riot recibe un correo de rescate exigiendo 10 millones de dólares a cambio de no filtrar ni vender el código robado.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">5</div><div class="chain-body"><h5>Postura pública</h5><p>Riot Games se niega a pagar y lo anuncia abiertamente en redes sociales, priorizando la transparencia con su comunidad sobre la posibilidad de recuperar el código en silencio.</p></div></div>
+    </div>
+
+    <div class="connector reveal">
+      <b>Por qué importa hoy:</b> Riot confirmó que ningún dato de jugadores fue comprometido, pero el ataque retrasó parches y abrió la puerta a nuevas trampas en sus juegos. Este caso demuestra que ni las certificaciones ni los firewalls más avanzados sirven de nada si un solo empleado puede ser engañado con un mensaje. Ese mismo principio apuntar directamente a las personas, no a las máquinas es la base de la herramienta de vigilancia más sofisticada jamás creada para uso comercial: Pegasus.
+    </div>
+  </div>
+</section>
+
+<!-- CASE 4: PEGASUS -->
+<section class="section" id="c4">
+  <div class="wrap">
+    <div class="case-strip">
+      <span class="tag">CASO #04 - BRIAM LEYVA</span>
+      <span class="classified" style="border-color:var(--amber); color:var(--amber);">SOFTWARE ACTIVO</span>
+    </div>
+    <div class="case-head reveal">
+      <div class="case-year">2016 — ACTUALIDAD · LA VIGILANCIA INVISIBLE</div>
+      <h2 class="case-title">Pegasus, el software de NSO Group</h2>
+      <p class="case-lead">El caso más inquietante de los cuatro, un spyware capaz de convertir cualquier teléfono en un micrófono, cámara y rastreador de ubicación permanente, sin que la víctima tenga absolutamente ninguna idea.</p>
+    </div>
+
+    <div class="fact-grid reveal">
+      <div class="fact"><div class="k">Desarrollador</div><div class="v amber">NSO Group (Israel)</div></div>
+      <div class="fact"><div class="k">Método</div><div class="v red">Zero-click (cero interacción)</div></div>
+      <div class="fact"><div class="k">Filtración clave</div><div class="v">+50.000 números en la lista Pegasus Project</div></div>
+      <div class="fact"><div class="k">Objetivos documentados</div><div class="v">Periodistas, activistas, abogados, jefes de estado</div></div>
+    </div>
+
+    <div class="chain reveal">
+      <div class="chain-step"><div class="chain-dot">1</div><div class="chain-body"><h5>Venta "legítima"</h5><p>NSO Group comercializa Pegasus oficialmente como una herramienta para que gobiernos combatan el terrorismo y el crimen organizado.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">2</div><div class="chain-body"><h5>Infección zero-click</h5><p>A diferencia de un virus tradicional, Pegasus no necesita que la víctima haga clic en nada, puede infectar un teléfono explotando fallas invisibles en apps como iMessage, sin dejar rastro de interacción.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">3</div><div class="chain-body"><h5>Control total del dispositivo</h5><p>Una vez instalado, el software puede leer mensajes, escuchar llamadas, activar cámara y micrófono en remoto, y rastrear la ubicación exacta del objetivo en todo momento.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">4</div><div class="chain-body"><h5>El Proyecto Pegasus (2021)</h5><p>Un consorcio de más de 80 periodistas de 17 medios, coordinado por Forbidden Stories y Amnistía Internacional, revela una lista de más de 50.000 números seleccionados como posibles objetivos por clientes de NSO Group.</p></div></div>
+      <div class="chain-step"><div class="chain-dot">5</div><div class="chain-body"><h5>Consecuencias globales</h5><p>Estados Unidos incluye a NSO Group en su lista negra comercial en 2021. Apple demanda a la empresa. El Parlamento Europeo abre una comisión de investigación. Aun así, casos de infección siguen documentándose años después.</p></div></div>
+    </div>
+
+    <div class="illo reveal">
+      <svg viewBox="0 0 360 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="pulse" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ffb454" stop-opacity=".5"/>
+            <stop offset="100%" stop-color="#ffb454" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect x="150" y="40" width="60" height="120" rx="10" stroke="#8a6a35" stroke-width="2"/>
+        <line x1="165" y1="150" x2="195" y2="150" stroke="#8a6a35" stroke-width="2"/>
+        <circle cx="180" cy="100" r="6" fill="var(--amber)"/>
+        <circle cx="180" cy="100" r="34" fill="url(#pulse)">
+          <animate attributeName="r" values="20;60;20" dur="2.8s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values=".8;0;.8" dur="2.8s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="60" cy="60" r="3" fill="var(--red)"/>
+        <circle cx="300" cy="150" r="3" fill="var(--red)"/>
+        <circle cx="60" cy="150" r="3" fill="var(--red)"/>
+        <circle cx="300" cy="55" r="3" fill="var(--red)"/>
+        <path d="M180 100 L60 60 M180 100 L300 150 M180 100 L60 150 M180 100 L300 55" stroke="var(--red)" stroke-width="1" stroke-dasharray="3 4" opacity=".55"/>
+        <text x="180" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--text-dim)">0 CLICS · 0 ALERTAS · CONTROL TOTAL</text>
+      </svg>
+    </div>
+
+    <div class="connector reveal">
+      <b>Por qué importa hoy:</b> Pegasus representa el punto más alto de una evolución que comenzó con un disquete que borraba archivos por diversión o notoriedad. Treinta años después, el malware ya no busca destruir datos a la vista de todos: busca no ser visto jamás, mientras convierte el propio teléfono de una persona en el arma perfecta para vigilarla.
+    </div>
+  </div>
+</section>
+
+<!-- OUTRO -->
+<section class="section" id="outro" style="border-bottom:none;">
+  <div class="wrap">
+    <div class="case-strip"><span class="tag">OPERACIONES FINALIZADAS</span><span class="classified" style="border-color:var(--green); color:var(--green);">REVISADO</span></div>
+    <p class="outro-q reveal">De Michelangelo a Pegasus hay treinta años de diferencia, pero una misma lógica: <span class="hl">cada avance en tecnología abre una nueva puerta, y siempre hay alguien dispuesto a forzarla</span>. La pregunta ya no es si habrá un próximo ataque, sino qué tan preparados como usuarios, empresas y sociedad estamos para el que sigue.</p>
+    <div class="tag-row reveal"
+    style="text-align: center; gap: 1rem;
+    display: flex; justify-content: center;
+    flex-wrap: wrap;">
+      <span class="tagp">#Ciberseguridad</span>
+      <span class="tagp">#Malware</span>
+      <span class="tagp">#PrivacidadDigital</span>
+    </div>
+    <div class="credits" style="text-align: center;">· MUCHAS GRACIASS ·</div>
+  </div>
+
+  <div class="chain reveal"
+  style="display: flex; 
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;">
+    <h2 class="hero-sub">Integrantes:</h2>
+    <div class="chain-step"><div class="chain-dot">-</div><div class="chain-body"><h5>John Redrovan</h5></div></div>
+    <div class="chain-step"><div class="chain-dot">-</div><div class="chain-body"><h5>Kevin Quinga</h5></div></div>
+    <div class="chain-step"><div class="chain-dot">-</div><div class="chain-body"><h5>David Paucar</h5></div></div>
+    <div class="chain-step"><div class="chain-dot">-</div><div class="chain-body"><h5>Briam Leyva</h5></div></div>
+    
+  </div>
+</section>
+
+<script>
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); } });
+},{threshold:0.12});
+revealEls.forEach(el=>io.observe(el));
+
+document.querySelectorAll('.chain').forEach(row=>{
+  [...row.children].forEach((c,i)=> c.style.transitionDelay = (i*0.08)+'s');
+});
+document.querySelectorAll('.fact-grid').forEach(row=>{
+  [...row.children].forEach((c,i)=> c.style.transitionDelay = (i*0.06)+'s');
+});
+
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', ()=>{
+  const h = document.documentElement;
+  const scrolled = (h.scrollTop)/(h.scrollHeight - h.clientHeight) * 100;
+  progress.style.width = scrolled + '%';
+});
+
+const sections = document.querySelectorAll('.section');
+const navLinks = document.querySelectorAll('#nav a');
+const navObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      navLinks.forEach(l=>l.classList.remove('active'));
+      const match = document.querySelector('#nav a[href="#'+entry.target.id+'"]');
+      if(match) match.classList.add('active');
+    }
+  });
+},{threshold:0.5});
+sections.forEach(s=>navObserver.observe(s));
+</script>
+</body>
+</html>
