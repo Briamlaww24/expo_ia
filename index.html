@@ -3,291 +3,175 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Normalización de bases de datos · 1FN a FNBC</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>LiFi — Internet a través de la luz</title>
 <style>
-:root{
-  --bg:#0d0c0a; --bg2:#141210; --card:rgba(255,248,235,.035); --line:rgba(255,240,215,.09); --line2:rgba(255,240,215,.18);
-  --text:#efe9dc; --dim:#a39b8b; --brass:#dcae62; --brass2:#f3d79b; --bad:#ec8576; --good:#93d6a4;
-  --serif:'Fraunces',Georgia,serif; --sans:'Hanken Grotesk',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
-  --rail:248px;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:2rem}
-body{background:var(--bg);color:var(--text);font:400 1.02rem/1.65 var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased}
-::selection{background:var(--brass);color:#1a1307}
-a{color:inherit}
-:focus-visible{outline:2px solid var(--brass);outline-offset:3px;border-radius:4px}
-
-/* fondo ambiental */
-.ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;
-  background:
-   radial-gradient(900px 600px at 78% -5%,rgba(220,174,98,.14),transparent 60%),
-   radial-gradient(700px 500px at 5% 70%,rgba(147,214,164,.05),transparent 60%),var(--bg)}
-.grain{position:fixed;inset:0;z-index:1000;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-.spot{position:fixed;width:520px;height:520px;left:0;top:0;z-index:0;pointer-events:none;border-radius:50%;
-  background:radial-gradient(circle,rgba(243,215,155,.09),transparent 65%);transform:translate(-50%,-50%);transition:opacity .4s;opacity:0}
-#progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:1100;background:linear-gradient(90deg,var(--brass),var(--brass2))}
-
-/* riel lateral */
-.rail{position:fixed;inset:0 auto 0 0;width:var(--rail);padding:2.4rem 1.8rem;z-index:50;display:flex;flex-direction:column;justify-content:space-between;
-  border-right:1px solid var(--line);background:linear-gradient(90deg,rgba(13,12,10,.85),rgba(13,12,10,.4));backdrop-filter:blur(14px)}
-.brand{font:600 1.15rem/1.2 var(--serif)}
-.brand small{display:block;font:400 .78rem var(--sans);color:var(--dim);margin-top:.35rem}
-.rail ul{list-style:none;position:relative;margin:2rem 0}
-.rail ul::before{content:'';position:absolute;left:5px;top:8px;bottom:8px;width:1px;background:var(--line2)}
-.rail li a{position:relative;display:flex;gap:1rem;align-items:center;padding:.62rem 0;text-decoration:none;color:var(--dim);font-size:.92rem;transition:color .25s}
-.rail li a::before{content:'';width:11px;height:11px;border-radius:50%;background:var(--bg);border:1px solid var(--line2);flex:none;transition:.3s}
-.rail li a:hover{color:var(--text)}
-.rail li a.on{color:var(--brass2)}
-.rail li a.on::before{background:var(--brass);border-color:var(--brass);box-shadow:0 0 0 5px rgba(220,174,98,.16),0 0 14px rgba(220,174,98,.5)}
-.rail .foot{font-size:.78rem;color:var(--dim)}
-
-main{margin-left:var(--rail);position:relative;z-index:1}
-.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(1.5rem,4vw,4rem)}
-section{padding:8rem 0;border-bottom:1px solid var(--line)}
-
-/* hero */
-#hero{min-height:100vh;display:flex;align-items:center;padding:5rem 0}
-.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:4rem;align-items:center}
-.boot{font:400 .82rem var(--mono);color:var(--good);display:grid;gap:.15rem;margin-bottom:1.8rem}
-.boot span{opacity:0;animation:in .5s forwards}
-.boot span:nth-child(2){animation-delay:.35s}.boot span:nth-child(3){animation-delay:.7s}
-.boot i{display:inline-block;width:.55em;height:1em;background:var(--brass);vertical-align:-2px;margin-left:5px;animation:blink 1s steps(1) infinite}
-@keyframes blink{50%{opacity:0}}
-@keyframes in{to{opacity:1}}
-h1{font:600 clamp(2.5rem,4.6vw,4.4rem)/1.04 var(--serif);letter-spacing:-.025em;font-variation-settings:'opsz' 144}
-h1 em{font-style:italic;font-weight:400;background:linear-gradient(100deg,var(--brass2),var(--brass));-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.08em}
-.sub{color:var(--dim);max-width:34rem;margin-top:1.6rem;font-size:1.08rem}
-.stats{display:flex;gap:2.8rem;margin-top:2.6rem;flex-wrap:wrap}
-.stats b{display:block;font:600 2.3rem/1 var(--serif);color:var(--brass2)}
-.stats span{font-size:.85rem;color:var(--dim)}
-.cta{display:inline-flex;align-items:center;gap:.6rem;margin-top:2.6rem;padding:.9rem 1.5rem;border-radius:999px;text-decoration:none;font-weight:600;color:#1a1307;
-  background:linear-gradient(120deg,var(--brass2),var(--brass));transition:transform .25s,box-shadow .25s}
-.cta:hover{transform:translateY(-2px);box-shadow:0 10px 30px -8px rgba(220,174,98,.55)}
-
-/* escalera de niveles (elemento memorable) */
-.stairs{display:grid;gap:.8rem}
-.stair{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center;text-decoration:none;padding:1.15rem 1.4rem;border:1px solid var(--line);border-radius:14px;background:var(--card);
-  transform-origin:left;opacity:0;animation:rise .8s cubic-bezier(.2,.8,.2,1) forwards;transition:border-color .3s,background .3s,translate .3s}
-.stair:nth-child(1){margin-right:3.6rem;animation-delay:.6s}.stair:nth-child(2){margin-right:2.4rem;animation-delay:.8s}
-.stair:nth-child(3){margin-right:1.2rem;animation-delay:1s}.stair:nth-child(4){animation-delay:1.2s;border-color:rgba(220,174,98,.4)}
-.stair:hover{border-color:var(--brass);background:rgba(220,174,98,.07);translate:6px 0}
-.stair .ab{font:600 1.7rem var(--serif);color:var(--brass2);min-width:3.4rem}
-.stair strong{display:block;font-weight:600;font-size:.98rem}
-.stair small{color:var(--dim);font-size:.84rem}
-@keyframes rise{from{opacity:0;transform:translateY(24px) scaleX(.94)}to{opacity:1;transform:none}}
-
-/* casos */
-.case-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:5rem;align-items:start}
-.side{position:sticky;top:3rem}
-.numeral{font:700 7.5rem/.9 var(--serif);color:transparent;-webkit-text-stroke:1px rgba(220,174,98,.45);margin-bottom:1rem}
-.kicker{color:var(--brass);font-size:.9rem;font-weight:500}
-h2{font:600 clamp(2rem,3.2vw,2.9rem)/1.08 var(--serif);letter-spacing:-.02em;margin:.5rem 0 1.2rem}
-.lead{color:var(--dim);max-width:30rem}
-.facts{margin-top:2rem;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
-.facts div{display:grid;grid-template-columns:7.5rem 1fr;gap:1rem;padding:.85rem 1.2rem;border-bottom:1px solid var(--line);font-size:.93rem}
-.facts div:last-child{border:0}
-.facts dt{color:var(--dim)}
-.facts dd.amber{color:var(--brass2)}.facts dd.red{color:var(--bad)}
-.author{display:flex;align-items:center;gap:.9rem;margin-top:1.8rem;font-size:.9rem;color:var(--dim)}
-.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font:600 .95rem var(--serif);color:#1a1307;background:linear-gradient(135deg,var(--brass2),var(--brass))}
-.author b{display:block;color:var(--text);font-weight:600}
-
-.steps{list-style:none;counter-reset:s;position:relative}
-.steps::before{content:'';position:absolute;left:17px;top:10px;bottom:10px;width:1px;background:linear-gradient(var(--line2),transparent)}
-.step{position:relative;padding:0 0 2.4rem 3.4rem;opacity:0;transform:translateY(18px);transition:opacity .7s,transform .7s}
-.step.in{opacity:1;transform:none}
-.step::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:35px;height:35px;border-radius:50%;display:grid;place-items:center;
-  background:var(--bg);border:1px solid var(--brass);color:var(--brass2);font:500 .85rem var(--mono)}
-.step h3{font:600 1.25rem/1.3 var(--serif);margin-bottom:.35rem}
-.step p{color:var(--dim)}
-.ex{margin-top:1.1rem;padding:1.1rem 1.2rem 0;border-radius:14px;border:1px solid var(--line);background:var(--bg2);overflow-x:auto}
-.pill{display:inline-block;margin-bottom:.9rem;padding:.2rem .75rem;border-radius:999px;font-size:.8rem;font-weight:600}
-.pill.bad{color:var(--bad);background:rgba(236,133,118,.12);border:1px solid rgba(236,133,118,.3)}
-.pill.good{color:var(--good);background:rgba(147,214,164,.1);border:1px solid rgba(147,214,164,.3)}
-.ex.bad{border-color:rgba(236,133,118,.25)}.ex.good{border-color:rgba(147,214,164,.25)}
-table{border-collapse:separate;border-spacing:0;font:400 .82rem var(--mono);margin-bottom:1.1rem;min-width:50%;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-th,td{padding:.55rem .95rem;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
-tr:last-child td{border-bottom:0}
-th{background:rgba(220,174,98,.09);color:var(--brass2);font-weight:500}
-th.pk{text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--brass)}
-td.bad{color:var(--bad);background:rgba(236,133,118,.08)}
-tbody tr{transition:background .2s}tbody tr:hover{background:rgba(255,240,215,.03)}
-.why{margin-top:.8rem;padding:1.4rem 1.6rem;border-radius:14px;border:1px solid var(--line);border-left:3px solid var(--brass);background:linear-gradient(100deg,rgba(220,174,98,.08),transparent);color:var(--dim)}
-.why b{color:var(--brass2);font-weight:600}
-
-/* conclusión */
-#outro{border:0;padding-bottom:6rem}
-.quote{font:400 clamp(1.7rem,3vw,2.6rem)/1.3 var(--serif);max-width:52rem;letter-spacing:-.015em}
-.quote em{font-style:italic;color:var(--brass2)}
-.tags{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:2rem}
-.tags span{padding:.35rem .9rem;border:1px solid var(--line2);border-radius:999px;font-size:.85rem;color:var(--dim)}
-.team{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:4rem}
-.member{padding:1.6rem;border:1px solid var(--line);border-radius:16px;background:var(--card);transition:border-color .3s,transform .3s,box-shadow .3s}
-.member:hover{border-color:rgba(220,174,98,.5);transform:translateY(-4px);box-shadow:0 18px 40px -20px rgba(220,174,98,.35)}
-.member .avatar{width:52px;height:52px;font-size:1.1rem;margin-bottom:1rem}
-.member b{display:block;font-weight:600}.member small{color:var(--dim)}
-.credits{margin-top:3rem;color:var(--dim);font-size:.9rem}
-
-/* responsive */
-@media(max-width:1180px){.case-grid{gap:3rem}.team{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:980px){
-  .rail{display:none}main{margin-left:0}
-  .hero-grid,.case-grid{grid-template-columns:1fr}.side{position:static}
-  section{padding:5rem 0}.numeral{font-size:5rem}
-}
-@media(max-width:520px){.team{grid-template-columns:1fr}.facts div{grid-template-columns:1fr;gap:.1rem}}
-@media(prefers-reduced-motion:reduce){
-  *{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
-  .step,.stair,.boot span{opacity:1;transform:none}
-}
+:root{--bg:#252832;--panel:#303541;--text:#f5f7fb;--muted:#bdc4d2;--cyan:#54e5f2;--yellow:#f6d45b;--pink:#ff8fbd;--green:#8bf0b2}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;overflow:hidden}
+button{font:inherit;cursor:pointer}
+.deck{height:100svh;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;display:grid;grid-template-columns:1.02fr 1fr;align-items:center;padding:7vh 7vw 9vh;opacity:0;transform:translateX(35px) scale(.985);pointer-events:none;transition:opacity .45s ease,transform .45s ease}
+.slide.active{opacity:1;transform:translateX(0) scale(1);pointer-events:auto}
+.kicker{font-size:.78rem;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan);font-weight:700;margin-bottom:1.2rem}
+h1,h2{margin:0;line-height:1.02;letter-spacing:-.04em}h1{font-size:clamp(3.2rem,8vw,7rem)}h2{font-size:clamp(2.5rem,5vw,4.8rem)}
+.accent{color:var(--cyan)}.yellow{color:var(--yellow)}
+.lead{font-size:clamp(1rem,1.6vw,1.3rem);line-height:1.65;color:var(--muted);max-width:560px;margin:1.5rem 0 0}
+.meta{display:flex;gap:1rem;flex-wrap:wrap;margin-top:2rem;color:#dce2ec;font-size:.85rem}.pill{border:1px solid #4a5262;padding:.55rem .8rem;border-radius:999px}
+.visual{min-height:60vh;position:relative;display:flex;align-items:center;justify-content:center}
+.orbit{position:absolute;width:min(37vw,420px);aspect-ratio:1;border:1px solid #4a5262;border-radius:50%;animation:spin 24s linear infinite}
+.orbit:before,.orbit:after{content:"";position:absolute;width:9px;height:9px;background:var(--yellow);border-radius:50%;box-shadow:0 0 18px var(--yellow)}
+.orbit:before{top:12%;left:20%}.orbit:after{bottom:18%;right:8%;background:var(--cyan);box-shadow:0 0 18px var(--cyan)}
+.glow{position:absolute;width:min(30vw,340px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(84,229,242,.19),rgba(84,229,242,0) 70%)}
+.figure{position:relative;width:min(35vw,390px);max-height:72vh;filter:drop-shadow(0 15px 25px #10131a55);z-index:2}
+.stars{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(var(--yellow) 1px,transparent 1.5px),radial-gradient(var(--cyan) 1px,transparent 1.5px);background-size:117px 131px,173px 157px;background-position:12px 20px,73px 58px;opacity:.65}
+.bottom{position:absolute;left:7vw;right:7vw;bottom:2.5vh;display:flex;align-items:center;justify-content:space-between;gap:1rem;z-index:10}
+.progress{height:4px;background:#454b58;border-radius:99px;overflow:hidden;flex:1;max-width:220px}.progress span{display:block;height:100%;width:16.66%;background:var(--cyan);transition:width .3s}
+.controls{display:flex;align-items:center;gap:.6rem}.navbtn,.smallbtn{border:1px solid #555d6c;background:#303541;color:white;border-radius:999px;padding:.7rem 1rem}.navbtn:hover,.smallbtn:hover{border-color:var(--cyan);color:var(--cyan)}.counter{font-size:.8rem;color:var(--muted);min-width:52px;text-align:center}
+.cardrow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin-top:1.6rem;max-width:580px}
+.info{background:#303541;border:1px solid #454c5b;border-radius:18px;padding:1.1rem}.info .emoji{font-size:1.6rem}.info h3{margin:.7rem 0 .4rem;font-size:1rem}.info p{color:var(--muted);line-height:1.5;font-size:.9rem;margin:0}
+.diagram{width:min(42vw,520px);background:#2d323e;border:1px solid #4b5362;border-radius:24px;padding:1.5rem;z-index:2;box-shadow:0 20px 60px #11141b55}
+.step{display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:14px;background:#383e4b;margin:.6rem 0}.step .ico{font-size:1.7rem;width:42px;text-align:center}.step small{display:block;color:var(--muted);margin-top:.3rem;line-height:1.4}
+.beam{height:4px;margin:-.1rem 0 .2rem 3.5rem;width:calc(100% - 4rem);background:linear-gradient(90deg,var(--yellow),var(--cyan));box-shadow:0 0 12px var(--cyan);animation:pulse 1.2s infinite alternate}
+.stat{font-size:clamp(2rem,4vw,3.4rem);font-weight:800;color:var(--yellow);letter-spacing:-.04em}
+.quizbox{background:#303541;border:1px solid #4b5362;border-radius:22px;padding:1.5rem;max-width:550px;margin-top:1.5rem}.answers{display:grid;gap:.6rem;margin-top:1rem}.answers button{text-align:left;border:1px solid #596171;border-radius:12px;background:#383e4b;color:white;padding:.85rem 1rem}.answers button:hover{border-color:var(--cyan)}.feedback{min-height:1.5rem;color:var(--green);margin-top:.9rem;font-weight:700}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{from{opacity:.45;filter:brightness(.8)}to{opacity:1;filter:brightness(1.5)}}
+@media(max-width:760px){body{overflow:hidden}.slide{grid-template-columns:1fr;padding:7vh 7vw 12vh;align-content:center;gap:1rem}.slide .visual{min-height:29vh;max-height:34vh}.figure{width:min(48vw,250px);max-height:34vh}.orbit{width:min(55vw,260px)}.glow{width:50vw}.lead{margin-top:1rem}.meta{margin-top:1rem}.cardrow{margin-top:1rem}.diagram{width:100%;padding:.7rem}.step{padding:.65rem;margin:.4rem 0}.step small{font-size:.75rem}.bottom{left:6vw;right:6vw;bottom:1.5vh}.navbtn{padding:.6rem .8rem}.kicker{margin-bottom:.7rem}h1{font-size:clamp(3rem,15vw,5rem)}h2{font-size:clamp(2.2rem,10vw,3.5rem)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="ambient"></div><div class="grain"></div><div class="spot" id="spot"></div><div id="progress"></div>
+<div class="deck">
+<div class="stars"></div>
 
-<aside class="rail">
-  <div class="brand">Normalización<small>Bases de datos · 1FN a FNBC</small></div>
-  <ul id="nav"></ul>
-  <div class="foot">Equipo de 4 integrantes</div>
-</aside>
+<section class="slide active">
+ <div class="copy">
+  <div class="kicker">Tecnología · Redes inalámbricas</div>
+  <h1>Li<span class="accent">Fi</span><br><span class="yellow">Internet</span><br>a través<br>de la luz.</h1>
+  <p class="lead">¿Y si una bombilla pudiera iluminar una habitación y, al mismo tiempo, conectar tus dispositivos?</p>
+  <div class="meta"><span class="pill">Light Fidelity</span><span class="pill">Comunicación óptica</span><span class="pill">Presentación interactiva</span></div>
+ </div>
+ <div class="visual">
+  <div class="glow"></div><div class="orbit"></div>
+  <svg class="figure" viewBox="0 0 380 470" role="img" aria-label="Ilustración de una persona junto a una bombilla que transmite datos">
+   <defs><linearGradient id="shirt" x1="0" x2="1"><stop stop-color="#d89a61"/><stop offset="1" stop-color="#a96c48"/></linearGradient><radialGradient id="lamp"><stop stop-color="#fff9bd"/><stop offset="1" stop-color="#f6d45b" stop-opacity=".2"/></radialGradient></defs>
+   <ellipse cx="192" cy="438" rx="150" ry="22" fill="#151923"/>
+   <circle cx="202" cy="210" r="150" fill="#303745"/>
+   <!-- head and hair -->
+   <path d="M118 107 Q115 45 171 34 Q226 27 243 80 L237 145 Q222 180 179 176 Q135 166 118 107Z" fill="#f2c6a5"/>
+   <path d="M117 103 Q98 54 137 31 Q130 14 155 28 Q185 5 219 32 Q250 51 243 91 L231 76 Q213 67 204 43 Q189 64 164 55 Q146 52 133 75 L130 111Z" fill="#15171e"/>
+   <path d="M125 112 Q142 131 158 124" fill="none" stroke="#b67863" stroke-width="3" stroke-linecap="round"/>
+   <circle cx="158" cy="92" r="4" fill="#222733"/><circle cx="203" cy="92" r="4" fill="#222733"/>
+   <path d="M163 119 Q181 130 199 115" fill="none" stroke="#a65e58" stroke-width="3" stroke-linecap="round"/>
+   <g fill="none" stroke="#282d38" stroke-width="5"><circle cx="158" cy="92" r="18"/><circle cx="203" cy="92" r="18"/><path d="M176 91h9"/></g>
+   <!-- body -->
+   <path d="M133 168 Q105 176 88 225 L55 352 Q52 373 75 379 L105 385 L139 282 L133 418 L267 418 L252 268 L286 361 Q298 380 318 365 Q333 354 323 333 L286 218 Q275 181 238 170 L214 160 L160 160Z" fill="url(#shirt)"/>
+   <path d="M158 160 Q175 190 199 193 Q222 186 232 165 L215 145 L172 146Z" fill="#7d4a4c"/>
+   <path d="M160 162 L171 201 L200 219 L225 193 L233 163 L218 156 Q201 178 179 157Z" fill="#f6d45b" opacity=".7"/>
+   <!-- arm holding lamp -->
+   <path d="M281 223 Q302 235 299 265 L282 312 Q273 327 259 316 Q249 307 259 289 L267 253Z" fill="#f2c6a5"/>
+   <!-- lamp -->
+   <g transform="translate(275 326)">
+    <path d="M-24 -18 Q-32 -47 0 -53 Q32 -47 24 -18 L12 0 H-12Z" fill="#fff4a8" stroke="#f6d45b" stroke-width="3"/>
+    <path d="M-11 2H11 M-9 8H9 M-6 14H6" stroke="#c2a542" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="0" cy="-29" r="48" fill="url(#lamp)" opacity=".55"/>
+   </g>
+   <!-- trousers -->
+   <path d="M137 400 L199 400 L185 455 L126 455Z" fill="#38465e"/><path d="M202 400 L258 400 L281 455 L222 455Z" fill="#38465e"/>
+   <!-- data dots -->
+   <g fill="#54e5f2"><circle cx="303" cy="250" r="4"/><circle cx="328" cy="223" r="3"/><circle cx="338" cy="265" r="5"/><circle cx="309" cy="286" r="3"/></g>
+   <g stroke="#54e5f2" stroke-width="2" fill="none" opacity=".8"><path d="M300 245 Q326 235 333 216"/><path d="M305 263 Q333 266 346 283"/></g>
+  </svg>
+ </div>
+</section>
 
-<main>
-  <section id="hero">
-    <div class="wrap hero-grid">
-      <div>
-        <div class="boot"><span>&gt; Iniciando archivo de casos…<i></i></span><span>&gt; Redundancia detectada en la base de datos</span><span>&gt; Cargando las 4 formas normales</span></div>
-        <h1>Normalización de <em>bases de datos</em>: las 4 formas que ordenan la información</h1>
-        <p class="sub">Las cuatro formas principales de normalización son la 1FN, 2FN, 3FN y la Forma Normal de Boyce-Codd (FNBC), diseñadas progresivamente para eliminar la redundancia y garantizar la integridad de los datos.</p>
-        <div class="stats">
-          <div><b data-n="4">0</b><span>integrantes</span></div>
-          <div><b data-n="4">0</b><span>formas normales</span></div>
-          <div><b data-n="1">0</b><span>objetivo: integridad</span></div>
-        </div>
-        <a class="cta" href="#c1">Empezar por la 1FN</a>
-      </div>
-      <nav class="stairs" id="stairs" aria-label="Niveles de normalización"></nav>
-    </div>
-  </section>
-  <div id="cases"></div>
-  <section id="outro">
-    <div class="wrap">
-      <p class="quote">De la 1FN a la FNBC, el camino es el mismo: <em>cada forma normal elimina un tipo de redundancia y acerca los datos a la integridad</em>. Normalizar no es complicar la base de datos, es hacerla confiable.</p>
-      <div class="tags"><span>#BasesDeDatos</span><span>#Normalización</span><span>#IntegridadDeDatos</span></div>
-      <div class="team" id="team"></div>
-      <p class="credits">Muchas gracias.</p>
-    </div>
-  </section>
-</main>
-
-<script>
-/* ---------- Datos (el contenido vive aquí; el HTML se genera) ----------
-   En tablas: encabezado terminado en * = clave primaria · celda que empieza con ! = dato problemático */
-const CASES = [
- {id:'c1',n:'01',who:'Briam Leyva',ab:'1FN',kicker:'Nivel 1 · El primer orden',title:'Primera Forma Normal',
-  lead:'La base de todo. Elimina los grupos repetitivos asegurando que cada columna contenga valores atómicos (indivisibles) y que cada fila sea única mediante una clave primaria.',
-  facts:[['Elimina','Grupos repetitivos','red'],['Columnas','Valores atómicos (indivisibles)','amber'],['Filas','Únicas mediante clave primaria'],['Requisito previo','Ninguno']],
-  steps:[
-   {t:'El problema',p:'Una tabla guarda varios valores en una sola celda, por ejemplo varios teléfonos de un cliente separados por comas.',ex:{ok:0,l:'No cumple 1FN',tb:[[['id_cliente','nombre','teléfonos'],[['1','Ana','!0991111, 0982222']]]]}},
-   {t:'Detectar grupos repetitivos',p:'Se identifican las columnas con más de un valor o repetidas (tel1, tel2, tel3), que dificultan buscar, actualizar y borrar datos.'},
-   {t:'Hacer los valores atómicos',p:'Cada celda debe contener un único valor indivisible. Cada teléfono pasa a ocupar su propia fila.'},
-   {t:'Definir la clave primaria',p:'Se elige una clave primaria que identifique cada fila de forma única, sin duplicados.'},
-   {t:'Resultado',p:'La tabla ya cumple 1FN.',ex:{ok:1,l:'Cumple 1FN',tb:[[['id_cliente*','teléfono*','nombre'],[['1','0991111','Ana'],['1','0982222','Ana']]]]}}],
-  why:'sin 1FN no se puede ni buscar ni filtrar bien. Pero ordenar las celdas no basta: ahora el nombre "Ana" se repite en cada fila. Para eso existe el siguiente nivel, que trata la relación entre los atributos y la clave.'},
- {id:'c2',n:'02',who:'Kevin Quinga',ab:'2FN',kicker:'Nivel 2 · Dependencia completa',title:'Segunda Forma Normal',
-  lead:'Cumple con la 1FN y elimina las dependencias parciales, asegurando que todos los atributos que no forman parte de la clave dependan por completo de toda la clave primaria.',
-  facts:[['Requisito previo','Cumplir 1FN','amber'],['Elimina','Dependencias parciales','red'],['Regla','Todo atributo depende de TODA la clave'],['Aplica a','Principalmente claves compuestas']],
-  steps:[
-   {t:'El problema',p:'La clave primaria es compuesta (id_pedido + id_producto), pero el nombre del producto solo depende de id_producto.',ex:{ok:0,l:'No cumple 2FN',tb:[[['id_pedido*','id_producto*','cantidad','nombre_producto'],[['10','5','2','!Teclado'],['11','5','1','!Teclado']]]]}},
-   {t:'Verificar 1FN',p:'Antes de pasar a 2FN, la tabla ya debe tener valores atómicos y una clave primaria definida.'},
-   {t:'Detectar la dependencia parcial',p:'nombre_producto depende solo de una parte de la clave (id_producto), no de la clave completa. Resultado: "Teclado" se repite en cada pedido.'},
-   {t:'Separar en tablas',p:'Los atributos que dependen de una parte de la clave pasan a su propia tabla, y se enlazan con una clave foránea.'},
-   {t:'Resultado',p:'Cada dato vive en un solo lugar.',ex:{ok:1,l:'Cumple 2FN',tb:[[['id_pedido*','id_producto*','cantidad'],[['10','5','2'],['11','5','1']]],[['id_producto*','nombre_producto'],[['5','Teclado']]]]}}],
-  why:'si el producto cambia de nombre, ahora se modifica en un solo lugar. Si la clave no es compuesta, la 2FN se cumple automáticamente. Pero aún queda otro tipo de dependencia oculta: la que pasa a través de un atributo intermedio.'},
- {id:'c3',n:'03',who:'Pedro Gualoto',ab:'3FN',kicker:'Nivel 3 · Solo la clave',title:'Tercera Forma Normal',
-  lead:'Cumple con la 2FN y elimina las dependencias transitivas, garantizando que los atributos no clave dependan únicamente de la clave primaria y no de otros atributos que no sean clave.',
-  facts:[['Requisito previo','Cumplir 2FN','amber'],['Elimina','Dependencias transitivas','red'],['Regla','Atributos no clave dependen solo de la clave'],['Idea clave','A → B → C: C no debe colgar de B']],
-  steps:[
-   {t:'El problema',p:'En la tabla de empleados, el nombre del departamento depende del id_departamento, que a su vez depende del empleado.',ex:{ok:0,l:'No cumple 3FN',tb:[[['id_empleado*','nombre','id_depto','nombre_depto'],[['1','Luis','7','!Ventas'],['2','María','7','!Ventas']]]]}},
-   {t:'Verificar 2FN',p:'La tabla debe estar en 2FN antes de revisar las dependencias transitivas.'},
-   {t:'Detectar la dependencia transitiva',p:'id_empleado → id_depto → nombre_depto. El nombre del departamento no depende directamente de la clave primaria, sino de otro atributo que no es clave.'},
-   {t:'Mover los atributos a su propia tabla',p:'Los atributos que dependen de un atributo no clave se llevan a una tabla nueva, conservando el id_depto como clave foránea.'},
-   {t:'Resultado',p:'Si "Ventas" cambia de nombre, se actualiza una sola fila.',ex:{ok:1,l:'Cumple 3FN',tb:[[['id_empleado*','nombre','id_depto'],[['1','Luis','7'],['2','María','7']]],[['id_depto*','nombre_depto'],[['7','Ventas']]]]}}],
-  why:'para la mayoría de aplicaciones, llegar a 3FN es suficiente. Pero en casos especiales, con varias claves candidatas que se solapan, todavía pueden quedar anomalías. Ahí entra la versión más estricta.'},
- {id:'c4',n:'04',who:'David Paucar',ab:'FNBC',kicker:'Nivel 4 · La más estricta',title:'Forma Normal de Boyce-Codd',
-  lead:'Es una versión más estricta de la 3FN que exige que, para cada dependencia funcional existente, el determinante sea obligatoriamente una superclave de la tabla.',
-  facts:[['Requisito previo','Cumplir 3FN','amber'],['Regla','Todo determinante debe ser superclave','red'],['Es','Una 3FN más estricta'],['Aparece cuando','Hay claves candidatas que se solapan']],
-  steps:[
-   {t:'El problema',p:'En una tabla de tutorías, cada profesor enseña una sola materia (profesor → materia), pero profesor no es superclave de la tabla.',ex:{ok:0,l:'No cumple FNBC',tb:[[['estudiante*','materia*','profesor'],[['Ana','Bases de Datos','!Pérez'],['Luis','Bases de Datos','!Pérez']]]]}},
-   {t:'Listar las dependencias funcionales',p:'Se identifican todas: (estudiante, materia) → profesor y profesor → materia.'},
-   {t:'Revisar cada determinante',p:'El lado izquierdo de cada dependencia debe ser una superclave. Aquí "profesor" determina la materia pero no identifica la fila completa: se viola la FNBC.'},
-   {t:'Descomponer la tabla',p:'Se separa para que cada determinante sea clave en su propia tabla, sin perder información.'},
-   {t:'Resultado',p:'Cada dependencia queda respaldada por una superclave.',ex:{ok:1,l:'Cumple FNBC',tb:[[['profesor*','materia'],[['Pérez','Bases de Datos']]],[['estudiante*','profesor*'],[['Ana','Pérez'],['Luis','Pérez']]]]}}],
-  why:'la FNBC cierra el ciclo: cada forma normal incluye a la anterior y es más exigente. Una base de datos normalizada evita duplicados, errores al actualizar y datos contradictorios.'}
-];
-const STAIR_SUB = ['Valores atómicos y clave primaria','Sin dependencias parciales','Sin dependencias transitivas','Todo determinante es superclave'];
-const initials = s => s.split(' ').map(w=>w[0]).join('');
-
-/* ---------- Render ---------- */
-const table = ([head,rows]) => `<table><thead><tr>${head.map(h=>h.endsWith('*')?`<th class="pk">${h.slice(0,-1)}</th>`:`<th>${h}</th>`).join('')}</tr></thead><tbody>${
-  rows.map(r=>`<tr>${r.map(c=>c.startsWith('!')?`<td class="bad">${c.slice(1)}</td>`:`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
-
-document.getElementById('stairs').innerHTML = CASES.map((c,i)=>
-  `<a class="stair" href="#${c.id}"><span class="ab">${c.ab}</span><span><strong>${c.title}</strong><small>${STAIR_SUB[i]}</small></span></a>`).join('');
-
-document.getElementById('cases').innerHTML = CASES.map(c=>`
-<section id="${c.id}"><div class="wrap case-grid">
-  <header class="side">
-    <div class="numeral">${c.n}</div>
-    <div class="kicker">${c.kicker}</div>
-    <h2>${c.title} (${c.ab})</h2>
-    <p class="lead">${c.lead}</p>
-    <dl class="facts">${c.facts.map(f=>`<div><dt>${f[0]}</dt><dd class="${f[2]||''}">${f[1]}</dd></div>`).join('')}</dl>
-    <div class="author"><span class="avatar">${initials(c.who)}</span><span>Presenta<b>${c.who}</b></span></div>
-  </header>
-  <div>
-    <ol class="steps">${c.steps.map(s=>`
-      <li class="step"><h3>${s.t}</h3><p>${s.p}</p>${s.ex?`
-        <div class="ex ${s.ex.ok?'good':'bad'}"><span class="pill ${s.ex.ok?'good':'bad'}">${s.ex.ok?'✓':'✗'} ${s.ex.l}</span><br>${s.ex.tb.map(table).join('')}</div>`:''}
-      </li>`).join('')}
-    </ol>
-    <div class="why"><b>Por qué importa:</b> ${c.why}</div>
+<section class="slide">
+ <div class="copy">
+  <div class="kicker">01 · Concepto</div><h2>¿Qué es <span class="accent">LiFi</span>?</h2>
+  <p class="lead">Es una tecnología inalámbrica que transmite datos usando luz, normalmente de lámparas LED. La luz cambia de intensidad a gran velocidad y un receptor interpreta esos cambios como información digital.</p>
+  <div class="cardrow">
+   <div class="info"><div class="emoji">💡</div><h3>La luz transmite</h3><p>La bombilla codifica los datos en señales luminosas.</p></div>
+   <div class="info"><div class="emoji">📡</div><h3>El receptor interpreta</h3><p>Un sensor convierte la señal luminosa en datos.</p></div>
   </div>
-</div></section>`).join('');
+ </div>
+ <div class="visual"><div class="glow"></div><div class="orbit"></div><div class="diagram">
+  <div class="step"><div class="ico">🌐</div><div><b>Internet</b><small>Los datos llegan al transmisor.</small></div></div><div class="beam"></div>
+  <div class="step"><div class="ico">💡</div><div><b>Bombilla LED</b><small>La luz transporta la información.</small></div></div><div class="beam"></div>
+  <div class="step"><div class="ico">💻</div><div><b>Dispositivo</b><small>El receptor recupera los datos.</small></div></div>
+ </div></div>
+</section>
 
-document.getElementById('team').innerHTML = CASES.map(c=>
-  `<div class="member"><span class="avatar">${initials(c.who)}</span><b>${c.who}</b><small>${c.title} (${c.ab})</small></div>`).join('');
+<section class="slide">
+ <div class="copy">
+  <div class="kicker">02 · Origen</div><h2>De una idea<br>a una <span class="yellow">red de luz.</span></h2>
+  <p class="lead">La comunicación óptica tiene antecedentes antiguos. La tecnología LiFi moderna ganó visibilidad gracias a los avances de los LED y al trabajo del investigador Harald Haas.</p>
+  <div class="cardrow">
+   <div class="info"><div class="stat">2011</div><h3>Demostración pública</h3><p>Harald Haas presentó el concepto LiFi en una charla TED.</p></div>
+   <div class="info"><div class="stat">2023</div><h3>Estándar IEEE</h3><p>IEEE 802.11bb impulsó la estandarización de comunicaciones mediante luz.</p></div>
+  </div>
+ </div>
+ <div class="visual"><div class="glow"></div><div class="orbit"></div><svg class="figure" viewBox="0 0 360 420" role="img" aria-label="Bombilla iluminada y ondas de datos"><circle cx="180" cy="190" r="135" fill="#303745"/><circle cx="180" cy="175" r="92" fill="#f6d45b" opacity=".08"/><path d="M122 155 Q112 100 180 85 Q248 100 238 155 Q232 185 208 207 L208 235 L152 235 L152 207 Q128 185 122 155Z" fill="#fff1a1" stroke="#f6d45b" stroke-width="5"/><path d="M153 243H207 M158 254H202 M165 265H195" stroke="#f6d45b" stroke-width="7" stroke-linecap="round"/><g stroke="#54e5f2" stroke-width="3" fill="none"><path d="M91 134 Q55 175 91 216"/><path d="M68 111 Q15 175 68 239"/><path d="M269 134 Q305 175 269 216"/><path d="M292 111 Q345 175 292 239"/></g><g fill="#54e5f2"><circle cx="77" cy="65" r="5"/><circle cx="280" cy="293" r="4"/><circle cx="72" cy="302" r="3"/></g></svg></div>
+</section>
 
-const NAV = [['hero','Inicio'],...CASES.map(c=>[c.id,`${c.title.replace(' Forma Normal','')} · ${c.ab}`.replace('Forma Normal de ','')]),['outro','Conclusión']];
-document.getElementById('nav').innerHTML = NAV.map(n=>`<li><a href="#${n[0]}">${n[1]}</a></li>`).join('');
+<section class="slide">
+ <div class="copy">
+  <div class="kicker">03 · Características</div><h2>¿Qué la hace<br><span class="accent">diferente?</span></h2>
+  <p class="lead">LiFi puede ofrecer altas velocidades y limitar la señal a espacios iluminados. Su rendimiento real depende del equipo, la distancia, la luz ambiental y las condiciones de instalación.</p>
+  <div class="cardrow">
+   <div class="info"><div class="emoji">⚡</div><h3>Alta velocidad potencial</h3><p>Puede transmitir grandes cantidades de datos.</p></div>
+   <div class="info"><div class="emoji">🧱</div><h3>La luz no cruza paredes opacas</h3><p>La cobertura suele quedar más localizada.</p></div>
+   <div class="info"><div class="emoji">📻</div><h3>Menos radiointerferencia</h3><p>Útil en entornos sensibles a radiofrecuencia.</p></div>
+   <div class="info"><div class="emoji">🔌</div><h3>Necesita compatibilidad</h3><p>Se requieren transmisores y receptores adecuados.</p></div>
+  </div>
+ </div>
+ <div class="visual"><div class="glow"></div><div class="orbit"></div><div class="diagram">
+  <div style="text-align:center;padding:.8rem 0 1.2rem"><div style="font-size:3.5rem">💡</div><h3>Un haz de luz, datos en movimiento</h3><p style="color:var(--muted);line-height:1.5">La señal luminosa se modula tan rápido que los cambios normalmente no son perceptibles para el ojo.</p></div>
+  <div class="beam"></div><div class="step"><div class="ico">🔒</div><div><b>Más confinamiento</b><small>Puede ayudar a limitar la señal a una habitación, pero no garantiza seguridad absoluta.</small></div></div>
+ </div></div>
+</section>
 
-/* ---------- Interacción ---------- */
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const io = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.15});
-document.querySelectorAll('.step').forEach(el=>io.observe(el));
+<section class="slide">
+ <div class="copy">
+  <div class="kicker">04 · Aplicaciones</div><h2>La luz también<br>puede <span class="yellow">conectar.</span></h2>
+  <p class="lead">LiFi puede complementar al Wi-Fi en espacios donde se necesita una conexión localizada o donde el uso de radiofrecuencia presenta limitaciones.</p>
+  <div class="cardrow">
+   <div class="info"><div class="emoji">🏥</div><h3>Hospitales</h3><p>Áreas con requisitos especiales de comunicación.</p></div>
+   <div class="info"><div class="emoji">🎓</div><h3>Educación</h3><p>Aulas, laboratorios y bibliotecas conectadas.</p></div>
+   <div class="info"><div class="emoji">🏭</div><h3>Industria</h3><p>Entornos con maquinaria y automatización.</p></div>
+   <div class="info"><div class="emoji">🏢</div><h3>Edificios inteligentes</h3><p>Iluminación y conectividad integradas.</p></div>
+  </div>
+ </div>
+ <div class="visual"><div class="glow"></div><div class="orbit"></div><svg class="figure" viewBox="0 0 380 420" role="img" aria-label="Edificio inteligente conectado por luz"><rect x="75" y="75" width="230" height="270" rx="12" fill="#394150" stroke="#687284" stroke-width="3"/><path d="M55 95L190 28L325 95" fill="#303745" stroke="#687284" stroke-width="4"/><g fill="#54e5f2"><rect x="100" y="110" width="45" height="38" rx="4"/><rect x="167" y="110" width="45" height="38" rx="4"/><rect x="234" y="110" width="45" height="38" rx="4"/><rect x="100" y="174" width="45" height="38" rx="4"/><rect x="234" y="174" width="45" height="38" rx="4"/></g><g fill="#f6d45b"><rect x="167" y="174" width="45" height="38" rx="4"/><rect x="100" y="238" width="45" height="38" rx="4"/><rect x="167" y="238" width="45" height="38" rx="4"/><rect x="234" y="238" width="45" height="38" rx="4"/></g><rect x="165" y="295" width="50" height="50" rx="5" fill="#252832"/><g stroke="#54e5f2" stroke-width="3" fill="none"><path d="M35 160 Q10 205 35 250"/><path d="M345 160 Q370 205 345 250"/></g><circle cx="190" cy="52" r="10" fill="#fff1a1"/><path d="M190 60V80" stroke="#f6d45b" stroke-width="3"/></svg></div>
+</section>
 
-const links = [...document.querySelectorAll('#nav a')];
-const so = new IntersectionObserver(es=>es.forEach(e=>{
-  if(e.isIntersecting) links.forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id));
-}),{rootMargin:'-45% 0px -50% 0px'});
-document.querySelectorAll('main section').forEach(s=>so.observe(s));
+<section class="slide">
+ <div class="copy">
+  <div class="kicker">05 · Comparación y cierre</div><h2>LiFi + Wi-Fi:<br><span class="accent">mejor juntos.</span></h2>
+  <p class="lead">LiFi no tiene que reemplazar al Wi-Fi. Pueden complementarse: el Wi-Fi ofrece cobertura amplia y la luz puede proporcionar conexiones localizadas en zonas específicas.</p>
+  <div class="cardrow">
+   <div class="info"><div class="emoji">📶</div><h3>Wi-Fi</h3><p>Usa ondas de radio y puede atravesar algunas paredes.</p></div>
+   <div class="info"><div class="emoji">💡</div><h3>LiFi</h3><p>Usa luz y puede quedar limitada por obstáculos opacos.</p></div>
+  </div>
+  <div class="quizbox">
+   <b>Mini reto: ¿qué utiliza LiFi para transmitir información?</b>
+   <div class="answers"><button onclick="answer(false)">A. Únicamente cables de cobre</button><button onclick="answer(true)">B. Señales de luz, normalmente de LED</button><button onclick="answer(false)">C. Ondas de sonido</button></div>
+   <div class="feedback" id="feedback" aria-live="polite"></div>
+  </div>
+ </div>
+ <div class="visual"><div class="glow"></div><div class="orbit"></div><svg class="figure" viewBox="0 0 380 420" role="img" aria-label="Bombilla con símbolos de conexión"><circle cx="190" cy="200" r="145" fill="#303745"/><circle cx="190" cy="180" r="85" fill="#f6d45b" opacity=".12"/><path d="M133 158 Q123 105 190 90 Q257 105 247 158 Q241 187 218 207 L218 236 L162 236 L162 207 Q139 187 133 158Z" fill="#fff1a1" stroke="#f6d45b" stroke-width="5"/><path d="M162 244H218 M168 256H212 M175 268H205" stroke="#f6d45b" stroke-width="7" stroke-linecap="round"/><g fill="#54e5f2" font-family="Arial" font-weight="bold" font-size="25"><text x="60" y="120">01</text><text x="270" y="150">10</text><text x="70" y="285">11</text><text x="270" y="300">01</text></g><g stroke="#54e5f2" stroke-width="2" fill="none"><path d="M75 137L130 157"/><path d="M267 167L250 173"/><path d="M94 270L144 225"/><path d="M270 278L225 225"/></g></svg></div>
+</section>
 
-const bar = document.getElementById('progress'), de = document.documentElement;
-addEventListener('scroll',()=>{bar.style.width = de.scrollTop/(de.scrollHeight-de.clientHeight)*100+'%';},{passive:true});
-
-const spot = document.getElementById('spot');
-if(!reduce && matchMedia('(pointer:fine)').matches){
-  addEventListener('pointermove',e=>{spot.style.opacity=1;spot.style.left=e.clientX+'px';spot.style.top=e.clientY+'px';},{passive:true});
-}
-
-document.querySelectorAll('[data-n]').forEach(el=>{
-  const end=+el.dataset.n; if(reduce){el.textContent=end;return;}
-  let i=0; const t=setInterval(()=>{el.textContent=++i; if(i>=end)clearInterval(t);},260);
-});
+<div class="bottom">
+ <div class="progress" aria-label="Progreso de presentación"><span id="bar"></span></div>
+ <div class="controls"><button class="navbtn" id="prev" aria-label="Diapositiva anterior">← Anterior</button><span class="counter" id="counter">01 / 06</span><button class="navbtn" id="next" aria-label="Siguiente diapositiva">Siguiente →</button><button class="smallbtn" id="fullscreen" title="Pantalla completa" aria-label="Pantalla completa">⛶</button></div>
+</div>
+</div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];let current=0;
+function show(n){current=(n+slides.length)%slides.length;slides.forEach((s,i)=>s.classList.toggle('active',i===current));document.getElementById('counter').textContent=String(current+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');document.getElementById('bar').style.width=((current+1)/slides.length*100)+'%';document.getElementById('prev').style.opacity=current===0?'.55':'1';document.getElementById('next').textContent=current===slides.length-1?'Volver al inicio ↺':'Siguiente →';}
+document.getElementById('prev').addEventListener('click',()=>show(current-1));document.getElementById('next').addEventListener('click',()=>show(current+1));
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();show(current+1)}if(e.key==='ArrowLeft')show(current-1);if(e.key.toLowerCase()==='f')toggleFull()});
+function answer(ok){const f=document.getElementById('feedback');f.textContent=ok?'¡Correcto! LiFi transmite datos mediante señales de luz.':'Inténtalo otra vez: piensa en qué medio utiliza LiFi.';f.style.color=ok?'var(--green)':'var(--pink)'}
+function toggleFull(){if(!document.fullscreenElement){document.documentElement.requestFullscreen?.()}else{document.exitFullscreen?.()}}
+document.getElementById('fullscreen').addEventListener('click',toggleFull);show(0);
 </script>
 </body>
 </html>
